@@ -1,0 +1,109 @@
+<!-- appointment_app/templates/appointment_app/facility_management.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facility Management - Health-Clinic</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .heading {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .heading h1 {
+            color: #5cb85c;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .table {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-add {
+            background-color: #5cb85c;
+            color: white;
+        }
+        .btn-add:hover {
+            background-color: #4cae4c;
+        }
+        .btn-edit, .btn-delete {
+            margin-right: 5px;
+        }
+        .btn-edit {
+            background-color: #5cb85c;
+            color: white;
+        }
+        .btn-edit:hover {
+            background-color: #4cae4c;
+        }
+        .btn-delete {
+            background-color: #d9534f;
+            color: white;
+        }
+        .btn-delete:hover {
+            background-color: #c9302c;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Heading -->
+        <div class="heading">
+            <h1>Facility Management</h1>
+            <p class="text-muted">Manage healthcare facility details</p>
+        </div>
+
+        <!-- Add Facility Button -->
+        <div class="text-end mb-3">
+            <a href="{% url 'add_facility' %}" class="btn btn-add">Add New Facility</a>
+        </div>
+
+        <!-- Facilities Table -->
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">Facility ID</th>
+                    <th scope="col">Facility Name</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">Department</th>
+                    <th scope="col">Resources</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for facility in facilities %}
+                <tr>
+                    <td>{{ facility.id }}</td>
+                    <td>{{ facility.name }}</td>
+                    <td>{{ facility.location }}</td>
+                    <td>{{ facility.department }}</td> <!-- Ensure your Facility model has a department field -->
+                    <td>{{ facility.resources }}</td>  <!-- Ensure your Facility model has a resources field -->
+                    <td>
+                        <a href="{% url 'facility_edit' facility.id %}" class="btn btn-edit btn-sm">Edit</a>
+                        <a href="{% url 'facility_delete' facility.id %}" class="btn btn-delete btn-sm">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No facilities found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
