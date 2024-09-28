@@ -1,64 +1,62 @@
-from django.contrib.auth.views import LoginView
-from django.urls import reverse_lazy
-
-from django.contrib.auth.views import LoginView
-from django.urls import reverse_lazy
-from django.shortcuts import redirect
-from django.contrib.auth import get_user_model
-from .forms import CustomUserCreationForm  # Import your custom user creation form
-from django.views.generic.edit import CreateView
-from django.contrib.auth import login
+from django.contrib.auth import authenticate, logout, login
 from django.contrib import messages
-from .forms import DoctorUserCreationForm  # Import your custom doctor creation form
-from .forms import AdminUserCreationForm  # Import your custom admin creation form
+from django.views import View
+from django.shortcuts import render, redirect
+
+from .forms import CustomUserCreationForm  # Import your custom user creation form
 
 
+class CustomLoginView(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'login.html')
 
-class CustomLoginView(LoginView):
-    template_name = 'login.html'  # Specify your login template
+    def post(self, request, *args, **kwargs):
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        user = authenticate(request, username=email, password=password)
+        if user is not None:
+            login(request, user)
+            if user.role:
+                return redirect('patient_home')
+            elif user.role == 'doctor':
+                return redirect('patient_home')
+            elif user.role == 'patient':
+                return redirect('patient_home')
+            else:
+                return redirect('patient_home')
+        else:
+            messages.error(request, 'Invalid email or password.')
+            return redirect('login')
 
-    def form_valid(self, form):
-        # Call the parent class's form_valid method
-        user = form.get_user()
-        if user.is_superuser:
-            return redirect('admin_home')  # Redirect to admin home
-        elif user.role == 'doctor':
-            return redirect('doctor_home')  # Redirect to doctor home
-        elif user.role == 'patient':
-            return redirect('patient_home')  # Redirect to patient home
-        return super().form_valid(form)  # Default behavior if no role matches
-    
-class SignupView(CreateView):
-    template_name = 'signup.html'  # Specify your template name
-    form_class = CustomUserCreationForm  # Use your custom user creation form
-    success_url = reverse_lazy('login')  # Redirect to login page on success
 
-    def form_valid(self, form):
-        user = form.save()  # Save the new user
-        login(self.request, user)  # Log the user in immediately after signup
-        messages.success(self.request, 'Signup successful!')  # Success message
-        return redirect('admin_home')  # Redirect to admin home or suitable page   
+class SignUpView(View):
+    def get(self, request):
+        form = CustomUserCreationForm()
+        return render(request, 'signup.html', {'form': form})
 
-class DoctorSignupView(CreateView):
-    template_name = 'doctor_signup.html'  # Specify your template name
-    form_class = DoctorUserCreationForm  # Use your custom doctor creation form
-    success_url = reverse_lazy('login')  # Redirect to login page on success
+    def post(self, request):
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.role = form.cleaned_data.get('role')
+            user.save()
+            login(request, user)
+            messages.success(request, 'Patient signup successful!')
+            if user.role:
+                return redirect('admin_home')
+            elif user.role == 'doctor':
+                return redirect('doctor_home')
+            elif user.role == 'patient':
+                return redirect('patient_home')
+            else:
+                return redirect('patient_home')
+        else:
+            return render(request, 'signup.html', {'form': form})
+        
 
-    def form_valid(self, form):
-        user = form.save()  # Save the new doctor user
-        login(self.request, user)  # Log the user in immediately after signup
-        messages.success(self.request, 'Doctor signup successful!')  # Success message
-        return redirect('doctor_home')  # Redirect to doctor home or suitable page  
-
-class AdminSignupView(CreateView):
-    template_name = 'admin_signup.html'  # Specify your template name
-    form_class = AdminUserCreationForm  # Use your custom admin creation form
-    success_url = reverse_lazy('login')  # Redirect to login page on success
-
-    def form_valid(self, form):
-        user = form.save()  # Save the new admin user
-        login(self.request, user)  # Log the user in immediately after signup
-        messages.success(self.request, 'Admin signup successful!')  # Success message
-        return redirect('admin_home')  # Redirect to admin home or suitable page
+class LogoutView(View):
+    def get(self, request):
+        logout(request)
+        return redirect('login')
 
 

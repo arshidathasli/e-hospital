@@ -34,25 +34,37 @@ class CustomUser(AbstractUser):
         ('doctor', 'Doctor'),
         ('patient', 'Patient'),
     ]
+    
     GENDER_CHOICES = [
         (1, 'Male'),
         (2, 'Female'),
         (3, 'Other'),
     ]
 
+    blood_group = models.CharField(max_length=3, choices=[
+        ('A+', 'A+'),
+        ('A-', 'A-'),
+        ('B+', 'B+'),
+        ('B-', 'B-'),
+        ('AB+', 'AB+'),
+        ('AB-', 'AB-'),
+        ('O+', 'O+'),
+        ('O-', 'O-'),
+    ], null=True, blank=True)
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+
 
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=150, blank=True, null=True)
-    blood_group = models.CharField(max_length=10, null=True, blank=True)
     gender = models.IntegerField(choices=GENDER_CHOICES, null=True, blank=True)
     age = models.IntegerField(null=True, blank=True)
     account_type = models.CharField(max_length=30)
     phone_number = models.CharField(max_length=15, null=True, blank=True)
-    
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name'] 
     objects = CustomUserManager()
 
     def __str__(self):
