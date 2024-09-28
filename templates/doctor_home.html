@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Home - Health-Clinic</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <!-- Doctor Profile Section -->
+    <div class="card p-4 shadow-sm">
+        <h2 class="text-success">Welcome, Dr. {{ doctor.first_name }} {{ doctor.last_name }}</h2>
+        <p><strong>Email:</strong> {{ doctor.email }}</p>
+        <p><strong>Specialization:</strong> {{ doctor.profile.specialization }}</p>
+        <p><strong>Availability:</strong> {{ doctor.profile.availability }}</p>
+    </div>
+
+    <!-- Link to Patient Management -->
+    <div class="mt-4">
+        <a href="{% url 'doctor_home' %}" class="btn btn-success">Go to Patient Management</a>
+    </div>
+
+    <!-- Availability Form -->
+    <div class="mt-4">
+        <form method="POST" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="availability" class="form-label">Update Availability:</label>
+                <input type="text" class="form-control" id="availability" name="availability" placeholder="e.g., Monday to Friday, 9 AM - 5 PM" required>
+                <div class="invalid-feedback">
+                    Please enter your availability.
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success">Update Availability</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Bootstrap form validation
+    (function () {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation')
+
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+</body>
+</html>
