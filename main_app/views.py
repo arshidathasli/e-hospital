@@ -1,30 +1,14 @@
-from django.shortcuts import render
-from django.views.generic import TemplateView
+from django.shortcuts import render, render, redirect, get_object_or_404
+from django.views.generic import TemplateView, UpdateView, CreateView, DeleteView, FormView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Doctor  # Assuming you have a Doctor model
 from django.views import View
 from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.urls import reverse_lazy
-from django.views.generic import TemplateView, FormView
+from django.urls import reverse_lazy, reverse
 from django import forms
-from django.shortcuts import get_object_or_404, redirect
-from django.views.generic import ListView
-from .models import Appointment  # Import your PatientAppointment model
-from .forms import PatientUpdateForm
-from .models import Appointment  # Import your Appointment model
-from .forms import AppointmentForm  # Import your Appoint
-from .models import Facility
-from .forms import FacilityForm  
-# from .forms import DoctorForm
-from django.views.generic import UpdateView
-from django.views.generic import DeleteView
-from django.views.generic import CreateView
 
-from auth_app.models import CustomUser  # Import your CustomUser model
-from django.core.exceptions import ValidationError
-from django.utils import timezone
-from datetime import datetime
+from .forms import PatientUpdateForm, AppointmentForm
+from .models import Doctor, Appointment
+from auth_app.models import CustomUser
 
 
 class PatientHomeView(LoginRequiredMixin, View):
@@ -49,7 +33,7 @@ class DoctorsListView(LoginRequiredMixin, View):
     def get(self, request):
         specialization = request.GET.get('speciality', None)
         if specialization:
-            doctors = CustomUser.objects.filter(role='doctor')  # Filter by speciality
+            doctors = CustomUser.objects.filter(role='doctor')
         else:
             doctors = CustomUser.objects.filter(role='doctor')
         
@@ -240,45 +224,6 @@ class AppointmentCreateView(CreateView):
 
     def form_valid(self, form):
         return super().form_valid(form)  # You can add any extra logic here if needed 
-
-class FacilityManagementView(ListView):
-    model = Facility
-    template_name = 'appointment_app/facility_management.html'  # Path to your template
-    context_object_name = 'facilities'  # Name of the variable to access facilities in the template
-
-    def get_queryset(self):
-        return Facility.objects.all()  # You can add filters here if needed
-
-class FacilityEditView(UpdateView):
-    model = Facility
-    form_class = FacilityForm
-    template_name = 'appointment_app/facility_edit.html'
-    context_object_name = 'facility'
-
-    def get_success_url(self):
-        return reverse_lazy('facility_management')  # Redirect to the facility management page after saving
-
-    def get_object(self, queryset=None):
-        return get_object_or_404(Facility, id=self.kwargs.get('facility_id'))
-    
-
-class FacilityDeleteView(DeleteView):
-    model = Facility
-    template_name = 'appointment_app/facility_confirm_delete.html'
-    context_object_name = 'facility'
-    success_url = reverse_lazy('facility_management')  # Redirect to facility management page after deletion
-
-    def get_object(self, queryset=None):
-        return get_object_or_404(Facility, id=self.kwargs.get('facility_id'))
-    
-class FacilityCreateView(CreateView):
-    model = Facility
-    form_class = FacilityForm
-    template_name = 'appointment_app/facility_add.html'
-    success_url = reverse_lazy('facility_management')  # Redirect to facility management page after addition
-
-    def form_valid(self, form):
-        return super().form_valid(form)    
 
 
 class UserManagementView(ListView):
