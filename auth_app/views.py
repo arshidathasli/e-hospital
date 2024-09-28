@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.views import View
 from django.shortcuts import render, redirect
 
-from .forms import CustomUserCreationForm  # Import your custom user creation form
+from .forms import CustomUserCreationForm
 
 
 class CustomLoginView(View):

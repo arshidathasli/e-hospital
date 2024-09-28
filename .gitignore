@@ -1,4 +1,3 @@
 myenv/
-db.sqlite3
 templates/temp/
 __pycache__/

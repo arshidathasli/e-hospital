@@ -8,80 +8,73 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, FormView
 from django import forms
-from .models import Patient  # Ensure this model exists and is imported
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import ListView
-from .models import PatientAppointment  # Import your PatientAppointment model
-from .forms import PatientUpdateForm  # Import your Patient update form
+from .models import Appointment  # Import your PatientAppointment model
+from .forms import PatientUpdateForm
 from .models import Appointment  # Import your Appointment model
 from .forms import AppointmentForm  # Import your Appoint
 from .models import Facility
 from .forms import FacilityForm  
+# from .forms import DoctorForm
 from django.views.generic import UpdateView
 from django.views.generic import DeleteView
 from django.views.generic import CreateView
-from .forms import PatientForm  # Ensure you have a form defined for Patient
-from .forms import DoctorForm  # Import the form class for Doctor
+
+from auth_app.models import CustomUser  # Import your CustomUser model
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+from datetime import datetime
 
 
+class PatientHomeView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        context = {
+            'patient_id': request.user.id
+        }
+        return render(request, 'patient_home.html', context)
 
 
+class PatientMedicalHistoryView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        context = {
+            'patient_id': request.user.id
+        }
+        return render(request, 'patient_medical_history.html', context)
 
 
-
-
-
-
-
-
-
-
-
-
-class PatientHomeView(LoginRequiredMixin, TemplateView):
-    template_name = 'patient_home.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Add any context you want to pass to the template, for example, patient's id
-        context['patient_id'] = self.request.user.id  # Assuming the logged-in user is a patient
-        return context
-
-class DoctorsListView(ListView):
-    model = Doctor
+class DoctorsListView(LoginRequiredMixin, View):
     template_name = 'doctors_list.html'
-    context_object_name = 'doctors'
-
-    # Optionally, you can override get_queryset to add filtering or ordering
-    def get_queryset(self):
-        return Doctor.objects.all()
     
-class TakeAppointmentView(View):
-    template_name = 'take_appointment.html'
-
     def get(self, request):
-        # Available time slots (this can be fetched from the database)
-        time_slots = ['9:00 AM - 9:30 AM', '10:00 AM - 10:30 AM', '11:00 AM - 11:30 AM', '2:00 PM - 2:30 PM']
-        
-        # Render the template with available time slots
-        return render(request, self.template_name, {'time_slots': time_slots})
-
-    def post(self, request):
-        selected_time = request.POST.get('appointment_time')
-        
-        if selected_time:
-            # Handle the logic of saving the appointment to the database here
-            # For example:
-            # Appointment.objects.create(user=request.user, time=selected_time)
-
-            messages.success(request, f'Appointment booked for {selected_time}.')
-            return redirect('proceed_payment')  # Redirect to a success page after booking
+        specialization = request.GET.get('speciality', None)
+        if specialization:
+            doctors = CustomUser.objects.filter(role='doctor')  # Filter by speciality
         else:
-            messages.error(request, 'Please select a valid time slot.')
-            return redirect('take_appointment')
+            doctors = CustomUser.objects.filter(role='doctor')
         
+        return render(request, self.template_name, {'doctors': doctors})
+
+
+class AppointmentTimeView(LoginRequiredMixin, View):
+    template_name = 'appointment_time.html'
+    
+    def get(self, request):
+        doctor_id = request.GET.get('doctor_id', None)
+        if doctor_id:
+            time_slots = ['9:00 AM - 9:30 AM', '10:00 AM - 10:30 AM', '11:00 AM - 11:30 AM', '2:00 PM - 2:30 PM']
+        else:
+            time_slots = ['9:00 AM - 9:30 AM', '10:00 AM - 10:30 AM', '11:00 AM - 11:30 AM', '2:00 PM - 2:30 PM']
+        return render(request, self.template_name, {'time_slots': time_slots})
+    
+
+
+
+#Above Classes are edited 
+
+
 class AvailabilityForm(forms.Form):
-    availability = forms.CharField(max_length=255, required=True, label='Update Availability')        
+    availability = forms.CharField(max_length=255, required=True, label='Update Availability')    
 
 class DoctorHomeView(LoginRequiredMixin, TemplateView, FormView):
     template_name = 'doctor_home.html'
@@ -111,35 +104,38 @@ class DoctorHomeView(LoginRequiredMixin, TemplateView, FormView):
         else:
             return self.form_invalid(form)
         
+
 class PatientManagementView(LoginRequiredMixin, ListView):
-    model = Patient  # Assuming you have a Patient model
+    model = CustomUser  # Assuming you have a Patient model
     template_name = 'patient_management.html'
     context_object_name = 'patients'
 
     def get_queryset(self):
         # Customize this method if you want to filter patients based on specific criteria
-        return Patient.objects.all()  # Fetch all patients
+        return CustomUser.objects.all()  # Fetch all patients
 
     def post(self, request, *args, **kwargs):
         # Handle canceling an appointment here if needed
         patient_id = request.POST.get('patient_id')
         if patient_id:
             # Add your logic to cancel the appointment here
-            patient = get_object_or_404(Patient, id=patient_id)
+            patient = get_object_or_404(CustomUser, id=patient_id)
             patient.cancel_appointment()  # Assuming a method to cancel appointment exists
             return redirect(reverse_lazy('patient_management'))
         return super().post(request, *args, **kwargs)        
     
+
 class PatientDetailsView(View):
     def get(self, request, patient_id):
         # Fetch the specific patient by ID
-        patient = get_object_or_404(Patient, id=patient_id)
+        patient = get_object_or_404(CustomUser, id=patient_id)
         return render(request, 'patient_details.html', {'patient': patient})  
+
 
 class PatientAppointmentCancelView(View):
     def post(self, request, appointment_id):
         # Fetch the specific appointment by ID
-        appointment = get_object_or_404(PatientAppointment, id=appointment_id)
+        appointment = get_object_or_404(Appointment, id=appointment_id)
         
         # Cancel the appointment (you may want to mark it as canceled instead of deleting)
         appointment.is_canceled = True  # Assuming you have an 'is_canceled' field
@@ -148,26 +144,32 @@ class PatientAppointmentCancelView(View):
         messages.success(request, 'The appointment has been successfully canceled.')
         return redirect('patient_management')  # Redirect to the patient management page or wherever you want  
 
+
 class CancelAppointmentConfirmationView(View):
     def get(self, request, appointment_id):
-        appointment = get_object_or_404(PatientAppointment, id=appointment_id)
+        appointment = get_object_or_404(Appointment, id=appointment_id)
         return render(request, 'cancel_appointment.html', {'appointment': appointment})
     
+
 class PatientDetailsUpdateView(View):
     def get(self, request, patient_id):
-        patient = get_object_or_404(Patient, id=patient_id)
+        # Fetch the patient object or return a 404 error if not found
+        patient = get_object_or_404(CustomUser, id=patient_id)
+        # Initialize the form with the patient instance
         form = PatientUpdateForm(instance=patient)
         return render(request, 'patient_details_update.html', {'form': form, 'patient': patient})
 
     def post(self, request, patient_id):
-        patient = get_object_or_404(Patient, id=patient_id)
+        # Fetch the patient object or return a 404 error if not found
+        patient = get_object_or_404(CustomUser, id=patient_id)
+        # Bind the form to the request data and the patient instance
         form = PatientUpdateForm(request.POST, instance=patient)
         if form.is_valid():
-            form.save()
+            form.save()  # Save the updated details
             messages.success(request, 'Patient details have been successfully updated.')
-            return redirect('patient_management')  # Redirect to the patient management page or wherever you want
-        return render(request, 'patient_details_update.html', {'form': form, 'patient': patient})    
-
+            return redirect('patient_management')  # Redirect to a management page or desired URL
+        return render(request, 'patient_details_update.html', {'form': form, 'patient': patient})  # Render the form again with errors
+    
 
 class EPrescribingView(View):
     def get(self, request):
@@ -196,8 +198,10 @@ class AdminHomeView(TemplateView):
         # Add any additional context if necessary
         return context
 
+
 class AdminAppointmentManagementView(TemplateView):
     template_name = 'admin_appointment_management.html'  
+
 
 class AppointmentEditView(View):
     def get(self, request, *args, **kwargs):
@@ -283,13 +287,13 @@ class UserManagementView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['patients'] = Patient.objects.all()  # Fetch all patients
+        context['patients'] = CustomUser.objects.all()  # Fetch all patients
         context['doctors'] = Doctor.objects.all()    # Fetch all doctors
         return context
     
 class UserPatientEditView(UpdateView):
-    model = Patient
-    form_class = PatientForm
+    model = CustomUser
+    form_class = PatientUpdateForm
     template_name = 'appointment_app/patient_edit.html'
     context_object_name = 'patient'
     success_url = reverse_lazy('user_management')  # Redirect to user management page after saving
@@ -300,7 +304,7 @@ class UserPatientEditView(UpdateView):
         return context
 
 class PatientDeleteView(DeleteView):
-    model = Patient
+    model = CustomUser
     template_name = 'appointment_app/patient_confirm_delete.html'  # Create this template
     success_url = reverse_lazy('user_management')  # Redirect after deletion
 
@@ -309,16 +313,6 @@ class PatientDeleteView(DeleteView):
         context['patient'] = self.object  # Pass the patient object to the template
         return context
     
-class DoctorEditView(UpdateView):
-    model = Doctor
-    form_class = DoctorForm
-    template_name = 'appointment_app/doctor_edit.html'  # Create this template
-    success_url = reverse_lazy('user_management')  # Redirect after saving changes
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['doctor'] = self.object  # Pass the doctor object to the template
-        return context    
     
 class DoctorDeleteView(DeleteView):
     model = Doctor
