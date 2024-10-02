@@ -1,11 +1,11 @@
 from django import forms
-from auth_app.models import CustomUser  # Import your CustomUser model
-from .models import Appointment, Facility  # Import models from the same app
+from auth_app.models import CustomUser
+from .models import Appointment
 
 class PatientUpdateForm(forms.ModelForm):
     class Meta:
-        model = CustomUser  # Use your custom user model
-        fields = ['first_name', 'last_name', 'age', 'gender', 'blood_group']  # Specify existing fields in your model
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'age', 'gender', 'blood_group']
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -16,8 +16,8 @@ class PatientUpdateForm(forms.ModelForm):
 
 class AppointmentForm(forms.ModelForm):
     class Meta:
-        model = Appointment  # Use your Appointment model
-        fields = ['patient', 'doctor', 'department', 'appointment_date_time', 'status']  # Specify the fields
+        model = Appointment
+        fields = ['patient', 'doctor', 'department', 'appointment_date_time', 'status']
         widgets = {
             'patient': forms.Select(attrs={'class': 'form-control'}),
             'doctor': forms.Select(attrs={'class': 'form-control'}),

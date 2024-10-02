@@ -5,9 +5,12 @@ from django.views import View
 from django.contrib import messages
 from django.urls import reverse_lazy, reverse
 from django import forms
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
 
 from .forms import PatientUpdateForm, AppointmentForm
-from .models import Doctor, Appointment
+from .models import Specialization, Appointment
 from auth_app.models import CustomUser
 
 
@@ -52,6 +55,101 @@ class AppointmentTimeView(LoginRequiredMixin, View):
         return render(request, self.template_name, {'time_slots': time_slots})
     
 
+class DoctorHomeView(LoginRequiredMixin, View):
+    template_name = 'doctor_dashboard.html'
+
+    def get(self, request):
+        doctor_id = request.user.id
+        profile = CustomUser.objects.get(id=doctor_id)
+        specialization = Specialization.objects.filter(user=doctor_id).first()
+        appointments = None
+        availability = None
+        context = {
+            'first_name': profile.first_name,
+            'last_name': profile.last_name,
+            'email': profile.email,
+            'appointments': appointments,
+            'specialization': specialization.specialization,
+            'availability': availability
+        }
+        return render(request, self.template_name, context)
+    
+
+class DoctorProfileView(LoginRequiredMixin, View):
+    template_name = 'doctor_profile.html'
+
+    def get(self, request):
+        doctor_id = request.user.id
+        profile = CustomUser.objects.get(id = doctor_id)
+        print(f"Profile: {profile}")
+        specialization = Specialization.objects.filter(user = doctor_id).first()
+        context = {
+            'first_name': profile.first_name,
+            'last_name': profile.last_name,
+            'email': profile.email,
+            'phone_number': profile.phone_number,
+            'qualification': specialization.qualification if specialization else None,
+            'specialization': specialization.specialization if specialization else None,
+            'fee': specialization.fee if specialization else None,
+        }
+        return render(request, self.template_name, context)
+
+
+class PatientManagementView(LoginRequiredMixin, View):
+    template_name = 'patient_management.html'
+
+    def get(self, request):
+        context = {}
+        return render(request, self.template_name, context)
+
+
+class DoctorAvailabilityView(LoginRequiredMixin, View):
+    template_name = 'patient_management.html'
+
+    def get(self, request):
+        context = {}
+        return render(request, self.template_name, context)
+
+
+@require_POST
+@login_required
+def update_profile(request):
+    profile = CustomUser.objects.get(id = request.user.id)
+    profile.first_name = request.POST.get('first_name', profile.first_name)
+    profile.last_name = request.POST.get('last_name', profile.last_name)
+    profile.email = request.POST.get('email', profile.email)
+    profile.phone_number = request.POST.get('phone_number', profile.phone_number)
+    profile.save()
+
+    specialization_text = request.POST.get('specialization', None)
+    fee = request.POST.get('fee', None)
+    qualification = request.POST.get('qualification', None)
+    
+    if specialization_text or fee:
+        specialization_obj, created = Specialization.objects.get_or_create(user=profile)
+        if specialization_text:
+            specialization_obj.specialization = specialization_text
+        if fee:
+            specialization_obj.fee = fee
+        if qualification:
+            specialization_obj.qualification = qualification
+        
+        specialization_obj.save()
+    
+    
+    response_data = {
+        'first_name': profile.first_name,
+        'last_name': profile.last_name,
+        'email': profile.email,
+        'phone_number': profile.phone_number,
+        'qualification': specialization_obj.qualification or 'No Qualification added',
+        'specialization': specialization_obj.specialization or 'No Specialization added',
+        'fee': specialization_obj.fee or 'No Consultation fee added',
+    }
+    
+    return JsonResponse(response_data)
+
+
 
 
 #Above Classes are edited 
@@ -60,53 +158,6 @@ class AppointmentTimeView(LoginRequiredMixin, View):
 class AvailabilityForm(forms.Form):
     availability = forms.CharField(max_length=255, required=True, label='Update Availability')    
 
-class DoctorHomeView(LoginRequiredMixin, TemplateView, FormView):
-    template_name = 'doctor_home.html'
-    form_class = AvailabilityForm
-    success_url = reverse_lazy('doctor_home')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Fetch doctor from request.user
-        context['doctor'] = self.request.user
-        return context
-
-    def form_valid(self, form):
-        # Update doctor's availability
-        availability = form.cleaned_data['availability']
-        doctor_profile = self.request.user.profile
-        doctor_profile.availability = availability
-        doctor_profile.save()
-
-        # Redirect to the same page on success
-        return super().form_valid(form)
-
-    def post(self, request, *args, **kwargs):
-        form = self.get_form()
-        if form.is_valid():
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
-        
-
-class PatientManagementView(LoginRequiredMixin, ListView):
-    model = CustomUser  # Assuming you have a Patient model
-    template_name = 'patient_management.html'
-    context_object_name = 'patients'
-
-    def get_queryset(self):
-        # Customize this method if you want to filter patients based on specific criteria
-        return CustomUser.objects.all()  # Fetch all patients
-
-    def post(self, request, *args, **kwargs):
-        # Handle canceling an appointment here if needed
-        patient_id = request.POST.get('patient_id')
-        if patient_id:
-            # Add your logic to cancel the appointment here
-            patient = get_object_or_404(CustomUser, id=patient_id)
-            patient.cancel_appointment()  # Assuming a method to cancel appointment exists
-            return redirect(reverse_lazy('patient_management'))
-        return super().post(request, *args, **kwargs)        
     
 
 class PatientDetailsView(View):
@@ -258,13 +309,4 @@ class PatientDeleteView(DeleteView):
         context['patient'] = self.object  # Pass the patient object to the template
         return context
     
-    
-class DoctorDeleteView(DeleteView):
-    model = Doctor
-    template_name = 'appointment_app/doctor_confirm_delete.html'  # Create this template
-    success_url = reverse_lazy('user_management')  # Redirect after deletion
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['doctor'] = self.object  # Pass the doctor object to the template
-        return context

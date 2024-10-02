@@ -3,13 +3,14 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from auth_app.models import CustomUser  # Adjust the import based on your project structure
 
-class Doctor(models.Model):
+class Specialization(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)  # Use the imported CustomUser directly
-    specialization = models.CharField(max_length=100)
-    fee = models.PositiveIntegerField()
+    specialization = models.CharField(max_length=50)
+    qualification = models.CharField(max_length=50, null=True, blank=True)
+    fee = models.PositiveIntegerField(null=True, blank=True, default=None)
 
     def __str__(self):
-        return f'Dr. {self.user.email} - {self.specialty}'
+        return f'Dr. {self.user.email} - {self.specialization}'
 
     def clean(self):
         # Ensure the user has the 'doctor' role

@@ -1,0 +1,130 @@
+{% extends 'doctor_dashboard_base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Doctor Profile Section -->
+    <div class="card p-4 shadow-sm">
+        <div class="row">
+
+            <!-- Doctor Profile Information -->
+            <div class="col-md-9">
+                <h2 class="text-success" id="profileFirstName">{{ first_name }} {{ last_name }}</h2>
+                <p><strong>Email:</strong> <span id="profileEmail">{{ email }}</span></p>
+                <p><strong>Phone:</strong> <span id="profilePhoneNumber">{{ phone_number }}</span></p>
+                
+                {% if qualification %}
+                <p><strong>Qualification:</strong> <span id="profileQualification">{{ qualification }}</span></p>
+                {% else %}
+                <p><strong>Qualification:</strong> <span id="profileQualification">No Qualification added</span></p>
+                {% endif %}
+            
+                {% if specialization %}
+                <p><strong>Specialization:</strong> <span id="profileSpecialization">{{ specialization }}</span></p>
+                {% else %}
+                <p><strong>Specialization:</strong> <span id="profileSpecialization">No specialization added</span></p>
+                {% endif %}
+                
+                {% if fee %}
+                <p><strong>Consultation fee:</strong> <span id="profileFee">{{ fee }}</span></p>
+                {% else %}
+                <p><strong>Consultation fee:</strong> <span id="profileFee">No Consultation fee added</span></p>
+                {% endif %}
+            </div>            
+            <!-- Button to trigger modal -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editProfileModal">
+                Edit Profile
+            </button>
+            
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+            <div class="modal-body">
+            <form id="editProfileForm" method="POST" action="{% url 'update_profile' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" value="{{ first_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Last Name</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" value="{{ last_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone_number">Phone Number</label>
+                    <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ phone_number }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="qualification">Qualification</label>
+                    <input type="text" class="form-control" id="qualification" name="qualification" value="{{ qualification }}">
+                </div>
+                <div class="form-group">
+                    <label for="specialization">Specialization</label>
+                    <input type="text" class="form-control" id="specialization" name="specialization" value="{{ specialization }}">
+                </div>
+                <div class="form-group">
+                    <label for="fee">Consultation Fee</label>
+                    <input type="text" class="form-control" id="fee" name="fee" value="{{ fee }}">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#editProfileForm').on('submit', function(e) {
+            e.preventDefault(); // Prevent form submission the default way
+            
+            // Get the form data
+            var formData = $(this).serialize();
+            
+            // Make the AJAX request
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'), // The form's action URL
+                data: formData,
+                success: function(response) {
+                    console.log("AJAX request successful!");
+                    // Assuming response contains the updated profile data, you can update the DOM
+                    $('#profileFirstName').text(response.first_name);
+                    $('#profileLastName').text(response.last_name);
+                    $('#profileEmail').text(response.email);
+                    $('#profilePhoneNumber').text(response.phone_number);
+                    $('#profileQualification').text(response.qualification || 'No Qualification added');
+                    $('#profileSpecialization').text(response.specialization || 'No specialization added');
+                    $('#profileFee').text(response.fee || 'No Consultation fee added');
+    
+                    // Close the modal after success
+                    $('#editProfileModal').modal('hide');
+                    document.getElementById('editProfileModal').classList.remove('show');
+                    document.querySelector('.modal-backdrop').remove();  // Remove the backdrop element
+                    document.body.classList.remove('modal-open');       // Remove the 'modal-open' class from the body
+                    document.body.style.removeProperty('padding-right'); // Fix body padding caused by modal scrollbar
+                    console.log("Profile updated successfully!");
+                },
+                error: function(xhr, status, error) {
+                    console.log('An error occurred: ' + error);
+                }
+            });
+        });
+    });
+</script>
+
+
+{% endblock %}

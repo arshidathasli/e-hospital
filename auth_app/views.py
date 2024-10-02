@@ -16,10 +16,10 @@ class CustomLoginView(View):
         user = authenticate(request, username=email, password=password)
         if user is not None:
             login(request, user)
-            if user.role:
+            if user.role == 'patient':
                 return redirect('patient_home')
             elif user.role == 'doctor':
-                return redirect('patient_home')
+                return redirect('doctor_home')
             elif user.role == 'patient':
                 return redirect('patient_home')
             else:
