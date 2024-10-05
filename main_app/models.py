@@ -24,17 +24,33 @@ class Specialization(models.Model):
 
 class Appointment(models.Model):
     STATUS_CHOICES = [
+        ('temp', 'Temporary'),
         ('scheduled', 'Scheduled'),
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
         ('no-show', 'No Show'),
     ]
+    PAYMENT_CHOICES = [
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('cancelled', 'Cancelled'),
+        ('refunded', 'Refunded'),
+    ]
+    MODE_CHOICES = [
+        ('cash', 'Cash'),
+        ('card', 'Card'),
+        ('netbanking', 'Net Banking'),
+        ('upi', 'UPI'),
+    ]
 
     patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='patient_appointments')
     doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='doctor_appointments')
     department = models.CharField(max_length=100)
-    appointment_date_time = models.DateTimeField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
+    appointment_date = models.CharField(max_length=20)
+    appointment_time = models.CharField(max_length=20)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='temp')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default='pending')
+    mode_of_payment = models.CharField(max_length=50, choices=MODE_CHOICES, default='cash')
 
     def __str__(self):
         return f"{self.patient.first_name} with {self.doctor.first_name} on {self.appointment_date_time.strftime('%Y-%m-%d %H:%M')}"
@@ -47,10 +63,6 @@ class Appointment(models.Model):
         # Ensure the doctor has the 'doctor' role
         if self.doctor.role != 'doctor':
             raise ValidationError(f'{self.doctor.first_name} {self.doctor.last_name} is not a valid doctor.')
-
-        # Check if the appointment date and time is in the past
-        if self.appointment_date_time < timezone.now():
-            raise ValidationError('The appointment date and time cannot be in the past.')
 
     def save(self, *args, **kwargs):
         self.clean()  # Call the clean method before saving

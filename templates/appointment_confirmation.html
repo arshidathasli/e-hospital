@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Confirmation</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header text-center">
+                <h1>Appointment Confirmation</h1>
+            </div>
+            <div class="card-body">
+                <p><strong>Temporary Appointment ID:</strong> {{ appointment_id }}</p>
+                <p><strong>Patient Name:</strong> {{ patient_name }}</p>
+                <p><strong>Doctor:</strong> {{ doctor_name }}</p>
+                <p><strong>Department:</strong> {{ department }}</p>
+                <p><strong>Appointment Slot:</strong> {{ appointment_time }}</p>
+                <p><strong>Fee:</strong> {{ fee }}</p>
+            </div>
+            <div class="card-footer text-center">
+                <div class="btn-group" role="group">
+                    <a href="{% url 'cash_payment_url' appointment_id=appointment_id %}" class="btn btn-success">Proceed with Cash Payment</a>
+                    <a href="{{ payment_gateway_url }}" class="btn btn-primary">Proceed to Payment Gateway</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

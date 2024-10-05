@@ -16,6 +16,11 @@ from main_app.views import (
     DoctorProfileView,
     PatientManagementView,
     DoctorAvailabilityView,
+    ConfirmAppointmentView,
+
+    #Functions
+    update_profile,
+    update_doctor_availability,
 
 
     # PatientDetailsView,
@@ -38,16 +43,15 @@ from main_app.views import (
     # DoctorEditView,
     # DoctorDeleteView
 )
-from main_app.views import (
-    update_profile,
-    update_doctor_availability,
+
+from payment_app.views import (
+    CashPaymentView,
+
+    # ProceedPaymentView,
+    # PaymentView,
+    # ProcessPaymentView,
+    # PaymentSuccessView,
 )
-# from payment_app.views import (
-#     ProceedPaymentView,
-#     PaymentView,
-#     ProcessPaymentView,
-#     PaymentSuccessView,
-# )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -65,6 +69,9 @@ urlpatterns = [
     path('patient_medical_history/', PatientMedicalHistoryView.as_view(), name='patient_medical_history'),
     path('doctors_list/', DoctorsListView.as_view(), name='doctors_list'),
     path('appointment_time/', AppointmentTimeView.as_view(), name='appointment_time'),
+    path('confirm-appointment/', ConfirmAppointmentView.as_view(), name='confirm_appointment'),
+    path('confirm-appointment/cash-payment/<int:appointment_id>/', CashPaymentView.as_view(), name='cash_payment_url'),
+
     # path('proceed_payment/', ProceedPaymentView.as_view(), name='proceed_payment'),
     # path('payment/', PaymentView.as_view(), name='payment_signup'),
     # path('process_payment/', ProcessPaymentView.as_view(), name='process_payment'),

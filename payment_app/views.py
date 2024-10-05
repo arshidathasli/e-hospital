@@ -4,13 +4,23 @@ from django.urls import reverse
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, FormView
 from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+from main_app.models import Appointment
 
 
 
+class CashPaymentView(LoginRequiredMixin, View):
+    template_name = 'appointment_booked.html'
+    def get(self, request, appointment_id):
+        appointment = Appointment.objects.get(id=appointment_id)
+        appointment.status = 'scheduled'
+        appointment.save()
+        context = {
+            'appointment_id': appointment_id,
+        }
+        return render(request, self.template_name, context)
 
-
-class ProceedPaymentView(TemplateView):
-    template_name = 'proceed_payment.html'
 
 # Payment View (handles the form submission for payment)
 class PaymentView(FormView):

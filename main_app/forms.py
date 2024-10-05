@@ -14,14 +14,3 @@ class PatientUpdateForm(forms.ModelForm):
             'blood_group': forms.Select(attrs={'class': 'form-control'}),
         }
 
-class AppointmentForm(forms.ModelForm):
-    class Meta:
-        model = Appointment
-        fields = ['patient', 'doctor', 'department', 'appointment_date_time', 'status']
-        widgets = {
-            'patient': forms.Select(attrs={'class': 'form-control'}),
-            'doctor': forms.Select(attrs={'class': 'form-control'}),
-            'department': forms.TextInput(attrs={'class': 'form-control'}),
-            'appointment_date_time': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
-            'status': forms.Select(attrs={'class': 'form-control'}),
-        }
