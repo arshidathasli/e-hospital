@@ -38,8 +38,10 @@ from main_app.views import (
     # DoctorEditView,
     # DoctorDeleteView
 )
-from main_app.views import update_profile
-
+from main_app.views import (
+    update_profile,
+    update_doctor_availability,
+)
 # from payment_app.views import (
 #     ProceedPaymentView,
 #     PaymentView,
@@ -74,6 +76,7 @@ urlpatterns = [
     path('patient_management/', PatientManagementView.as_view(), name='patient_management'),
     path('doctor_availablity/', DoctorAvailabilityView.as_view(), name='doctor_availability'),
     path('update-profile/', update_profile, name='update_profile'),
+    path('update-doctor-availability/', update_doctor_availability, name='update_doctor_availability'),
 
     # path('patient_details/<int:patient_id>/', PatientDetailsView.as_view(), name='patient_details'),
     # path('patient_appointment_cancel/<int:appointment_id>/', PatientAppointmentCancelView.as_view(), name='patient_appointment_cancel'),

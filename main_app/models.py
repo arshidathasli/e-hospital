@@ -55,3 +55,13 @@ class Appointment(models.Model):
     def save(self, *args, **kwargs):
         self.clean()  # Call the clean method before saving
         super().save(*args, **kwargs)
+
+
+class DoctorAvailability(models.Model):
+    doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    day = models.DateField()
+    time_slots = models.JSONField()
+
+    def __str__(self):
+        return f'{self.doctor.first_name} is available on {self.day} during {self.time_slots}'
+

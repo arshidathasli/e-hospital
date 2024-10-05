@@ -1,3 +1,7 @@
+from datetime import datetime
+from pytz import timezone
+import pprint
+import json
 from django.shortcuts import render, render, redirect, get_object_or_404
 from django.views.generic import TemplateView, UpdateView, CreateView, DeleteView, FormView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -10,7 +14,11 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 
 from .forms import PatientUpdateForm, AppointmentForm
-from .models import Specialization, Appointment
+from .models import (
+    Specialization, 
+    Appointment, 
+    DoctorAvailability,
+)
 from auth_app.models import CustomUser
 
 
@@ -104,10 +112,41 @@ class PatientManagementView(LoginRequiredMixin, View):
 
 
 class DoctorAvailabilityView(LoginRequiredMixin, View):
-    template_name = 'patient_management.html'
+    template_name = 'doctor_availability.html'
 
     def get(self, request):
-        context = {}
+        india = timezone('Asia/Kolkata')
+        today = datetime.now(india).strftime('%Y-%m-%d')
+        slots = DoctorAvailability.objects.filter(doctor=request.user.id, day=today).first()
+        doctor_id = request.user.id
+        profile = CustomUser.objects.get(id = doctor_id)
+        print(f"Profile: {profile}")
+        specialization = Specialization.objects.filter(user = doctor_id).first()
+        context = {
+            'first_name': profile.first_name,
+            'last_name': profile.last_name,
+            'email': profile.email,
+            'phone_number': profile.phone_number,
+            'qualification': specialization.qualification if specialization else None,
+            'specialization': specialization.specialization if specialization else None,
+            'fee': specialization.fee if specialization else None,
+        }
+        time_slots = slots.time_slots if slots else None
+        if not slots:
+            time_slots = [
+                {"start_time": "9:00 AM", 
+                "end_time": "1:00 PM", 
+                "status": "Not Available"},
+                {"start_time": "2:00 PM",
+                "end_time": "6:00 PM",
+                "status": "Not Available"},
+                {"start_time": "2:00 PM",
+                "end_time": "6:00 PM",
+                "status": "Not Available"},
+            ]
+
+            DoctorAvailability.objects.create(doctor=request.user, day=today, time_slots=time_slots)
+        context["slots"] = time_slots
         return render(request, self.template_name, context)
 
 
@@ -149,6 +188,44 @@ def update_profile(request):
     
     return JsonResponse(response_data)
 
+
+@require_POST
+@login_required
+def update_doctor_availability(request):
+    doctor_id = request.user.id
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+    # Print request body
+    print("Request Body:")
+    pprint.pprint(data)
+    response_data = []
+    availability_list = data.get('availability', [])
+    availability_list_for_db = []
+    for availability_entry in availability_list:
+        start_time_str = availability_entry.get('start_time', None)
+        end_time_str = availability_entry.get('end_time', None)
+        status = availability_entry.get('status', None)
+        
+        print(f"Processing availability for start_time: {start_time_str}, end_time: {end_time_str}")
+        
+        if status and start_time_str and end_time_str:
+            availability_list_for_db.append({
+                'start_time': start_time_str,
+                'end_time': end_time_str,
+                'status': status
+            })
+    india = timezone('Asia/Kolkata')
+    today = datetime.now(india).strftime('%Y-%m-%d')
+    availability = DoctorAvailability.objects.filter(doctor=doctor_id, day=today).first()
+    availability.time_slots = availability_list_for_db
+    availability.save()
+
+    response_data = availability_list_for_db
+    
+    return JsonResponse({'status': 'success', 'availability': response_data})
 
 
 
