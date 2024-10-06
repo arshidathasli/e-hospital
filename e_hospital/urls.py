@@ -17,10 +17,12 @@ from main_app.views import (
     PatientManagementView,
     DoctorAvailabilityView,
     ConfirmAppointmentView,
+    ViewAppointmentView,
 
     #Functions
     update_profile,
     update_doctor_availability,
+    cancel_appointment,
 
 
     # PatientDetailsView,
@@ -67,6 +69,7 @@ urlpatterns = [
     # Patient paths
     path('patient_home/', PatientHomeView.as_view(), name='patient_home'),
     path('patient_medical_history/', PatientMedicalHistoryView.as_view(), name='patient_medical_history'),
+    path('patient_medical_history/cancel_appointment/', cancel_appointment, name='cancel_appointment_by_patient'),
     path('doctors_list/', DoctorsListView.as_view(), name='doctors_list'),
     path('appointment_time/', AppointmentTimeView.as_view(), name='appointment_time'),
     path('confirm-appointment/', ConfirmAppointmentView.as_view(), name='confirm_appointment'),
@@ -84,10 +87,11 @@ urlpatterns = [
     path('doctor_availablity/', DoctorAvailabilityView.as_view(), name='doctor_availability'),
     path('update-profile/', update_profile, name='update_profile'),
     path('update-doctor-availability/', update_doctor_availability, name='update_doctor_availability'),
+    path('patient_management/cancel_appointment/', cancel_appointment, name='cancel_appointment_by_doctor'),
+    path('patient_management/view_appointment/', ViewAppointmentView.as_view(), name='view_appointment_by_doctor'),
 
     # path('patient_details/<int:patient_id>/', PatientDetailsView.as_view(), name='patient_details'),
     # path('patient_appointment_cancel/<int:appointment_id>/', PatientAppointmentCancelView.as_view(), name='patient_appointment_cancel'),
-    # path('cancel_appointment/<int:appointment_id>/', CancelAppointmentConfirmationView.as_view(), name='cancel_appointment'),
     # path('patient_details_update/<int:patient_id>/', PatientDetailsUpdateView.as_view(), name='patient_details_update'),
     # path('E-prescribing/', EPrescribingView.as_view(), name='E-prescribing'),
 

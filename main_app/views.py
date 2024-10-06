@@ -3,17 +3,12 @@ from pytz import timezone
 import pprint
 import json
 from django.shortcuts import render, render, redirect, get_object_or_404
-from django.views.generic import TemplateView, UpdateView, CreateView, DeleteView, FormView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
-from django.contrib import messages
-from django.urls import reverse_lazy, reverse
-from django import forms
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 
-from .forms import PatientUpdateForm
 from .models import (
     Specialization, 
     Appointment, 
@@ -32,8 +27,10 @@ class PatientHomeView(LoginRequiredMixin, View):
 
 class PatientMedicalHistoryView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
+        appointments = Appointment.objects.filter(patient=request.user).order_by('-id')
         context = {
-            'patient_id': request.user.id
+            'patient_id': request.user.id,
+            'appointments': appointments,
         }
         return render(request, 'patient_medical_history.html', context)
 
@@ -73,18 +70,21 @@ class DoctorHomeView(LoginRequiredMixin, View):
     template_name = 'doctor_dashboard.html'
 
     def get(self, request):
+        india = timezone('Asia/Kolkata')
+        today = datetime.now(india).strftime('%Y-%m-%d')
         doctor_id = request.user.id
         profile = CustomUser.objects.get(id=doctor_id)
         specialization = Specialization.objects.filter(user=doctor_id).first()
         appointments = None
-        availability = None
+        slots = DoctorAvailability.objects.filter(doctor=doctor_id, day=today).first()
+        time_slots = slots.time_slots if slots else None
         context = {
             'first_name': profile.first_name,
             'last_name': profile.last_name,
             'email': profile.email,
             'appointments': appointments,
             'specialization': specialization.specialization,
-            'availability': availability
+            'slots': time_slots,
         }
         return render(request, self.template_name, context)
     
@@ -113,7 +113,14 @@ class PatientManagementView(LoginRequiredMixin, View):
     template_name = 'patient_management.html'
 
     def get(self, request):
-        context = {}
+        appointments = Appointment.objects.filter(doctor=request.user).order_by('-id')
+        profile = CustomUser.objects.get(id=request.user.id)
+
+        context = {
+            'first_name': profile.first_name,
+            'last_name': profile.last_name,
+            'appointments': appointments
+        }
         return render(request, self.template_name, context)
 
 
@@ -261,3 +268,33 @@ class ConfirmAppointmentView(LoginRequiredMixin, View):
 
         return render(request, self.template_name, context)
 
+
+@login_required
+def cancel_appointment(request):
+    appointment_id = request.GET.get('appointment_id')
+    if not appointment_id:
+        return JsonResponse({'error': 'Missing appointment ID'}, status=400)
+    
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    appointment.status = 'cancelled'
+    appointment.save()
+    
+    return JsonResponse({'status': 'success'})
+
+
+class ViewAppointmentView(LoginRequiredMixin, View):
+    template_name = 'patient_details.html'
+    
+    def get(self, request):
+        appointment_id = request.GET.get('appointment_id')
+        if not appointment_id:
+            return JsonResponse({'error': 'Missing appointment ID'}, status=400)
+        
+        appointment = get_object_or_404(Appointment, id=appointment_id)
+        context = {
+            'appointment': appointment,
+            'patient': appointment.patient,
+            'doctor': appointment.doctor,
+        }
+        return render(request, self.template_name, context)
+    

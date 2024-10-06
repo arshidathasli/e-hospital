@@ -1,57 +1,101 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Management - Health-Clinic</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f8f9fa; font-family: Arial, sans-serif; }
-        .container { margin-top: 50px; }
-        .heading { text-align: center; margin-bottom: 30px; }
-        .heading h1 { color: #5cb85c; font-size: 28px; font-weight: bold; }
-        .table { background-color: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
-        .btn-view { background-color: #5cb85c; color: white; }
-        .btn-view:hover { background-color: #4cae4c; }
-        .btn-cancel { background-color: #dc3545; color: white; }
-        .btn-cancel:hover { background-color: #c82333; }
-    </style>
-</head>
-<body>
+{% extends 'doctor_dashboard_base.html' %}
 
-<div class="container">
-    <div class="heading">
-        <h1>Patient Management</h1>
-        <p class="text-muted">View and manage patient appointments</p>
+{% block content %}
+<div class="container mt-5">
+<h2>Patient Appointments</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Appointment ID</th>
+            <th>Patient Name</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th>Payment Status</th>
+            <th>Mode of Payment</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for appointment in appointments %}
+        <tr>
+            <td>{{ appointment.id }}</td>
+            <td>{{ appointment.patient.first_name }} {{appointment.patient.last_name}}</td>
+            <td>{{ appointment.appointment_date }}</td>
+            <td>{{ appointment.appointment_time }}</td>
+            <td>{{ appointment.status }}</td>
+            <td>{{ appointment.payment_status }}</td>
+            <td>{{ appointment.mode_of_payment }}</td>
+            <td>
+                <a href="view_appointment/?appointment_id={{ appointment.id }}" class="btn btn-success">View Details</a>
+                {% if appointment.status != 'cancelled' %}
+                    <button class="btn btn-danger">Cancel Appointment</button>
+                {% else %}
+                    <button class="btn btn-danger" disabled>Cancel Appointment</button>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<!-- Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelModalLabel">Cancel Appointment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to cancel this appointment?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a id="confirmCancel" class="btn btn-danger" href="#">Cancel Appointment</a>
+            </div>
+        </div>
     </div>
-
-    <table class="table table-bordered table-hover">
-        <thead class="table-light">
-            <tr>
-                <th scope="col">Patient ID</th>
-                <th scope="col">Name</th>
-                <th scope="col">Condition</th>
-                <th scope="col">Time Slot</th>
-                <th scope="col">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for patient in patients %}
-            <tr>
-                <td>{{ patient.id }}</td>
-                <td>{{ patient.name }}</td>
-                <td>{{ patient.condition }}</td>
-                <td>{{ patient.time_slot }}</td>
-                <td>
-                    <a href="{% url 'patient_details' patient.id %}" class="btn btn-view btn-sm">View Details</a>
-                    <a href="{% url 'cancel_appointment' patient.id %}" class="btn btn-cancel btn-sm">Cancel Appointment</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var cancelButtons = document.querySelectorAll('.btn-danger');
+        var confirmCancel = document.getElementById('confirmCancel');
+        var cancelModal = new bootstrap.Modal(document.getElementById('cancelModal'));
+
+        cancelButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                var appointmentId = this.closest('tr').querySelector('td').innerText;
+                confirmCancel.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    fetch(`cancel_appointment/?appointment_id=${appointmentId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}' // Ensure you have the CSRF token available
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Handle successful cancellation, e.g., reload the page or update the UI
+                            location.reload();
+                        } else {
+                            // Handle error
+                            alert('Failed to cancel the appointment.');
+                        }
+                    })
+                    .catch(error => {
+                        // Handle network error
+                        alert('Network error. Please try again later.');
+                    });
+                });
+                cancelModal.show();
+            });
+        });
+    });
+</script>
+
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+
+{% endblock %}

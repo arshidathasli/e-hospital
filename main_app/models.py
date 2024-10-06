@@ -77,3 +77,13 @@ class DoctorAvailability(models.Model):
     def __str__(self):
         return f'{self.doctor.first_name} is available on {self.day} during {self.time_slots}'
 
+class MedicalHistory(models.Model):
+    patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='patient_medical_history')
+    summary = models.CharField(max_length=100)
+    notes = models.TextField()
+    date = models.DateField(default=timezone.now)
+
+    def __str__(self):
+        return f'{self.patient.first_name} with {self.doctor.first_name} on {self.date.strftime("%Y-%m-%d")}'
+    
+    
