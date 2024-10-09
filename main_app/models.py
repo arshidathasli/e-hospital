@@ -77,13 +77,35 @@ class DoctorAvailability(models.Model):
     def __str__(self):
         return f'{self.doctor.first_name} is available on {self.day} during {self.time_slots}'
 
+
 class MedicalHistory(models.Model):
     patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='patient_medical_history')
-    summary = models.CharField(max_length=100)
-    notes = models.TextField()
+    diagnoses = models.CharField(max_length=100, null=True, blank=True)
+    allergies = models.CharField(max_length=100, null=True, blank=True)
+    past_surgeries = models.CharField(max_length=100, null=True, blank=True)
+    medications = models.CharField(max_length=100, null=True, blank=True)
+    physical_therapy = models.CharField(max_length=100, null=True, blank=True)
+    diet_plan = models.CharField(max_length=100, null=True, blank=True)
     date = models.DateField(default=timezone.now)
 
     def __str__(self):
         return f'{self.patient.first_name} with {self.doctor.first_name} on {self.date.strftime("%Y-%m-%d")}'
-    
-    
+
+
+class Medication(models.Model):
+    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE)
+    medication = models.CharField(max_length=100)
+    dosage = models.CharField(max_length=100)
+    frequency = models.CharField(max_length=100)
+    duration = models.CharField(max_length=100)
+    start_date = models.DateField(default=timezone.now)
+    end_date = models.DateField(default=timezone.now)
+
+    def __str__(self):
+        return f'{self.appointment.id} on {self.start_date.strftime("%Y-%m-%d")}'
+
+
+class Prescription(models.Model):
+    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE)
+    diagnosis = models.CharField(max_length=100)
+

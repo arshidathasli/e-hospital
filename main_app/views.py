@@ -13,6 +13,8 @@ from .models import (
     Specialization, 
     Appointment, 
     DoctorAvailability,
+    Medication,
+    Prescription,
 )
 from auth_app.models import CustomUser
 
@@ -119,7 +121,8 @@ class PatientManagementView(LoginRequiredMixin, View):
         context = {
             'first_name': profile.first_name,
             'last_name': profile.last_name,
-            'appointments': appointments
+            'appointments': appointments,
+            'email': profile.email,
         }
         return render(request, self.template_name, context)
 
@@ -298,3 +301,94 @@ class ViewAppointmentView(LoginRequiredMixin, View):
         }
         return render(request, self.template_name, context)
     
+
+class PrescribeView(LoginRequiredMixin, View):
+    template_name = 'prescribe.html'
+
+    def get(self, request):
+        appointment_id = request.GET.get('appointment_id')
+        if not appointment_id:
+            return JsonResponse({'error': 'Missing appointment ID'}, status=400)
+        
+        appointment = get_object_or_404(Appointment, id=appointment_id)
+        medications = Medication.objects.filter(appointment=appointment)
+        medications_list = list(medications.values())
+        prescription = Prescription.objects.filter(appointment=appointment).first()
+
+        context = {
+            'appointment': appointment,
+            'patient': appointment.patient,
+            'doctor': appointment.doctor,
+            'medications': medications_list,
+            'diagnosis': prescription.diagnosis if prescription else None,
+        }
+        return render(request, self.template_name, context)
+    
+
+@login_required
+def add_medication(request):
+    print(f"reached add_medication")
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+    appointment_id = data.get('appointment_id')
+    medication = data.get('medication')
+    dosage = data.get('dosage')
+    frequency = data.get('frequency')
+    duration = data.get('duration')
+    if not appointment_id or not medication:
+        return JsonResponse({'error': 'Missing appointment ID or medication'}, status=400)
+    
+    medication_entry = Medication.objects.create(
+        appointment_id=appointment_id, 
+        medication=medication, 
+        dosage=dosage, 
+        frequency=frequency, 
+        duration=duration
+    )
+    
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    appointment.medication = medication_entry
+    appointment.save()
+    
+    return JsonResponse({'status': 'success'})
+
+
+@login_required
+def remove_medication(request):
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+    medication_id = data.get('med_id')
+    if not medication_id:
+        return JsonResponse({'error': 'Missing medication ID'}, status=400)
+    
+    medication = get_object_or_404(Medication, id=medication_id)
+    medication.delete()
+    
+    return JsonResponse({'status': 'success'})
+
+
+@login_required
+def save_prescription(request):
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+    appointment_id = data.get('appointment_id')
+    diagnosis = data.get('diagnosis')
+    if not appointment_id or not diagnosis:
+        return JsonResponse({'error': 'Missing appointment ID or diagnosis'}, status=400)
+    
+    prescription, created = Prescription.objects.update_or_create(
+        appointment_id=appointment_id,
+        defaults={
+            'diagnosis': diagnosis,    # Fields to update if the record exists
+        }
+    )    
+    return JsonResponse({'status': 'success'})

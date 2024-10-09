@@ -18,11 +18,15 @@ from main_app.views import (
     DoctorAvailabilityView,
     ConfirmAppointmentView,
     ViewAppointmentView,
+    PrescribeView,
 
     #Functions
     update_profile,
     update_doctor_availability,
     cancel_appointment,
+    add_medication,
+    remove_medication,
+    save_prescription,
 
 
     # PatientDetailsView,
@@ -89,6 +93,10 @@ urlpatterns = [
     path('update-doctor-availability/', update_doctor_availability, name='update_doctor_availability'),
     path('patient_management/cancel_appointment/', cancel_appointment, name='cancel_appointment_by_doctor'),
     path('patient_management/view_appointment/', ViewAppointmentView.as_view(), name='view_appointment_by_doctor'),
+    path('patient_management/view_appointment/e_prescribing/', PrescribeView.as_view(), name='prescribe'),
+    path('add_medication/', add_medication, name='add_medication'),
+    path('remove_medication/', remove_medication, name='remove_medication'),
+    path('save_prescription/', save_prescription, name='save_prescription'),
 
     # path('patient_details/<int:patient_id>/', PatientDetailsView.as_view(), name='patient_details'),
     # path('patient_appointment_cancel/<int:appointment_id>/', PatientAppointmentCancelView.as_view(), name='patient_appointment_cancel'),

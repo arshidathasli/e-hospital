@@ -1,0 +1,174 @@
+{% extends "doctor_dashboard_base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Prescribe Medication</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="diagnosis">Diagnosis:</label>
+            <p>{{ diagnosis }}</p>
+            <input type="text" id="diagnosis" name="diagnosis" class="form-control">
+        </div>
+        <button type="submit" id="save-button" class="btn btn-primary" disabled>Save</button>
+        <div id="medications-container">
+            <div class="form-group medication-entry">
+            <label for="medication">Medication:</label>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="medications-table">
+                    <thead>
+                        <tr>
+                            <th>Medication</th>
+                            <th>Dosage</th>
+                            <th>Frequency</th>
+                            <th>Duration</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for med in medications %}
+                        <tr class="medication-entry">
+                            <td><input type="text" name="medications[{{ forloop.counter0 }}][medication]" value="{{ med.medication }}" class="form-control"></td>
+                            <td><input type="text" name="medications[{{ forloop.counter0 }}][dosage]" value="{{ med.dosage }}" class="form-control"></td>
+                            <td><input type="text" name="medications[{{ forloop.counter0 }}][frequency]" value="{{ med.frequency }}" class="form-control"></td>
+                            <td><input type="text" name="medications[{{ forloop.counter0 }}][duration]" value="{{ med.duration }}" class="form-control"></td>
+                            <td>
+                                <button type="button" class="btn btn-danger remove-medication" data-med-id="{{ med.id }}">Remove</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="medication-entry">
+                            <td><input type="text" name="medications[][medication]" class="form-control"></td>
+                            <td><input type="text" name="medications[][dosage]" class="form-control"></td>
+                            <td><input type="text" name="medications[][frequency]" class="form-control"></td>
+                            <td><input type="text" name="medications[][duration]" class="form-control"></td>
+                            <td><button type="button" class="btn btn-success add-medication" disabled>Add</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+        <script>
+            document.getElementById('diagnosis').addEventListener('input', function(e) {
+                var saveButton = document.getElementById('save-button');
+                if (e.target.value.trim() !== '') {
+                    saveButton.disabled = false;
+                } else {
+                    saveButton.disabled = true;
+                }
+            });
+
+            document.getElementById('medications-container').addEventListener('input', function(e) {
+                var row = e.target.closest('tr');
+                var medication = row.querySelector('input[name="medications[][medication]"]').value;
+                var dosage = row.querySelector('input[name="medications[][dosage]"]').value;
+                var frequency = row.querySelector('input[name="medications[][frequency]"]').value;
+                var duration = row.querySelector('input[name="medications[][duration]"]').value;
+                var addButton = row.querySelector('.add-medication');
+
+                if (medication && dosage && frequency && duration) {
+                    addButton.disabled = false;
+                } else {
+                    addButton.disabled = true;
+                }
+            });
+
+            document.getElementById('medications-container').addEventListener('click', function(e) {
+                if (e.target && e.target.classList.contains('add-medication')) {
+                    var row = e.target.closest('tr');
+                    var medication = row.querySelector('input[name="medications[][medication]"]').value;
+                    var dosage = row.querySelector('input[name="medications[][dosage]"]').value;
+                    var frequency = row.querySelector('input[name="medications[][frequency]"]').value;
+                    var duration = row.querySelector('input[name="medications[][duration]"]').value;
+
+                    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                    fetch('/add_medication/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({
+                            medication: medication,
+                            dosage: dosage,
+                            frequency: frequency,
+                            duration: duration,
+                            appointment_id: '{{ appointment.id }}'
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            location.reload();
+                        } else {
+                            alert('Failed to add medication');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                }
+
+                if (e.target && e.target.classList.contains('remove-medication')) {
+                    var medId = e.target.getAttribute('data-med-id');
+                    var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                    fetch('/remove_medication/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({
+                            med_id: medId,
+                            appointment_id: '{{ appointment.id }}'
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            location.reload();
+                        } else {
+                            alert('Failed to remove medication');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                }
+            });
+
+            document.getElementById('save-button').addEventListener('click', function(e) {
+                e.preventDefault();
+                var diagnosis = document.getElementById('diagnosis').value;
+                var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                fetch('/save_prescription/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        diagnosis: diagnosis,
+                        appointment_id: '{{ appointment.id }}'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert('Failed to save prescription');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        </script>
+    </form>
+</div>
+{% endblock %}
