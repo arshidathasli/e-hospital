@@ -5,12 +5,23 @@ from auth_app.views import (
     SignUpView,
     LogoutView,
 )
+from payment_app.views import (
+    CashPaymentView,
+
+    # ProceedPaymentView,
+    # PaymentView,
+    # ProcessPaymentView,
+    # PaymentSuccessView,
+)
+
 from main_app.views import (
     # Patient related
     PatientHomeView,
     PatientMedicalHistoryView,
     DoctorsListView,
     AppointmentTimeView,
+    ViewPrescriptionView,
+
     # Doctor related
     DoctorHomeView,
     DoctorProfileView,
@@ -28,46 +39,35 @@ from main_app.views import (
     remove_medication,
     save_prescription,
 
+    # Admin related
+    AdminHomeView,
+    AdminProfileView,
+    AdminDoctorsListView,
+    AdminPatientsListView,
+    AdminAppointmentsListView,
 
-    # PatientDetailsView,
-    # PatientAppointmentCancelView,
-    # CancelAppointmentConfirmationView,
-    # PatientDetailsUpdateView,
-    # EPrescribingView,
-    # AdminHomeView,
-    # AdminAppointmentManagementView,
-    # AppointmentEditView,
-    # AppointmentCancelView,
-    # AppointmentCreateView,
-    # FacilityManagementView,
-    # FacilityEditView,
-    # FacilityDeleteView,
-    # FacilityCreateView,
-    # UserManagementView,
-    # UserPatientEditView,
-    # PatientDeleteView,
-    # DoctorEditView,
-    # DoctorDeleteView
+    # Admin functions
+    admin_update_profile,
 )
 
-from payment_app.views import (
-    CashPaymentView,
-
-    # ProceedPaymentView,
-    # PaymentView,
-    # ProcessPaymentView,
-    # PaymentSuccessView,
-)
 
 urlpatterns = [
+    # Admin paths
+    path('admin_home/', AdminHomeView.as_view(), name='admin_home'),
+    path('admin_profile/', AdminProfileView.as_view(), name='admin_profile'),
+    path('admin_doctors_list/', AdminDoctorsListView.as_view(), name='admin_doctors_list'),
+    path('admin_patients_list/', AdminPatientsListView.as_view(), name='admin_patients_list'),
+    path('admin_appointments_list/', AdminAppointmentsListView.as_view(), name='admin_appointments_list'),
+
+    path('admin_update_profile/', admin_update_profile, name='admin_update_profile'),
+    path('cancel_appointment/', cancel_appointment, name='cancel_appointment_by_admin'),
+
     path('admin/', admin.site.urls),
 
     # Auth app
     path('', CustomLoginView.as_view(), name='login'),
     path('login/', CustomLoginView.as_view(), name='login'),
     path('signup/', SignUpView.as_view(), name='signup'),
-    # path('doctor_signup/', DoctorSignupView.as_view(), name='doctor_signup'),
-    # path('admin_signup/', AdminSignupView.as_view(), name='admin_signup'),
     path('logout/', LogoutView.as_view(), name='logout'),
 
     # Patient paths
@@ -78,11 +78,7 @@ urlpatterns = [
     path('appointment_time/', AppointmentTimeView.as_view(), name='appointment_time'),
     path('confirm-appointment/', ConfirmAppointmentView.as_view(), name='confirm_appointment'),
     path('confirm-appointment/cash-payment/<int:appointment_id>/', CashPaymentView.as_view(), name='cash_payment_url'),
-
-    # path('proceed_payment/', ProceedPaymentView.as_view(), name='proceed_payment'),
-    # path('payment/', PaymentView.as_view(), name='payment_signup'),
-    # path('process_payment/', ProcessPaymentView.as_view(), name='process_payment'),
-    # path('payment_success/', PaymentSuccessView.as_view(), name='payment_success'),
+    path('view_prescription/<int:id>/', ViewPrescriptionView.as_view(), name='view_prescription'),
 
     # Doctor paths
     path('doctor_home/', DoctorHomeView.as_view(), name='doctor_home'),
@@ -98,24 +94,4 @@ urlpatterns = [
     path('remove_medication/', remove_medication, name='remove_medication'),
     path('save_prescription/', save_prescription, name='save_prescription'),
 
-    # path('patient_details/<int:patient_id>/', PatientDetailsView.as_view(), name='patient_details'),
-    # path('patient_appointment_cancel/<int:appointment_id>/', PatientAppointmentCancelView.as_view(), name='patient_appointment_cancel'),
-    # path('patient_details_update/<int:patient_id>/', PatientDetailsUpdateView.as_view(), name='patient_details_update'),
-    # path('E-prescribing/', EPrescribingView.as_view(), name='E-prescribing'),
-
-    # Admin paths
-    # path('admin_home/', AdminHomeView.as_view(), name='admin_home'),
-    # path('admin_appointment_management/', AdminAppointmentManagementView.as_view(), name='admin_appointment_management'),
-    # path('appointment_edit/<int:pk>/', AppointmentEditView.as_view(), name='appointment_edit'),
-    # path('appointment_cancel/', AppointmentCancelView.as_view(), name='appointment_cancel'),
-    # path('appointment/add/', AppointmentCreateView.as_view(), name='appointment_add'),
-    # path('facility_management/', FacilityManagementView.as_view(), name='facility_management'),
-    # path('edit_facility/<int:facility_id>/', FacilityEditView.as_view(), name='facility_edit'),
-    # path('delete_facility/<int:facility_id>/', FacilityDeleteView.as_view(), name='facility_delete'),
-    # path('add_facility/', FacilityCreateView.as_view(), name='facility_add'),
-    # path('user_management/', UserManagementView.as_view(), name='user_management'),
-    # path('edit_patient/<int:pk>/', UserPatientEditView.as_view(), name='edit_patient'),
-    # path('patient_delete/<int:pk>/', PatientDeleteView.as_view(), name='patient_delete'),
-    # path('doctor_edit/<int:pk>/', DoctorEditView.as_view(), name='doctor_edit_view'),
-    # path('doctor_delete/<int:pk>/', DoctorDeleteView.as_view(), name='doctor_delete_view'),
 ]

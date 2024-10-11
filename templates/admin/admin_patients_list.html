@@ -1,0 +1,28 @@
+{% extends 'admin/admin_dashboard_base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Patients List</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Contact</th>
+                <th scope="col">Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in patients %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ patient.name }}</td>
+                <td>{{ patient.contact }}</td>
+                <td>{{ patient.email }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

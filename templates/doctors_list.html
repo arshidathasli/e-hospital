@@ -33,17 +33,15 @@
                         <h3 class="card-title">{{ doctor.email }}</h3>
                         <p class="text-muted">Available Times:</p>
                         <ul class="list-unstyled">
-                            {% for availability in doctor.doctoravailability_set.all %}
-                                {% for time_slot in availability.time_slots %}
-                                    {% if time_slot.status == 'Available' %}
-                                        <li>
-                                            <input type="radio" name="time_slot_{{ doctor.id }}" value="{{ time_slot.start_time }} - {{ time_slot.end_time }}">
-                                            {{ time_slot.start_time }} - {{ time_slot.end_time }}
-                                        </li>
-                                    {% else %}
-                                        <li>{{ time_slot.start_time }} - {{ time_slot.end_time }} ({{ time_slot.status }})</li>
-                                    {% endif %}
-                                {% endfor %}
+                            {% for time_slot in doctor.time_slots %}
+                                {% if time_slot.status == 'Available' %}
+                                    <li>
+                                        <input type="radio" name="time_slot_{{ doctor.doctor.id }}" value="{{ time_slot.start_time }} - {{ time_slot.end_time }}">
+                                        {{ time_slot.start_time }} - {{ time_slot.end_time }}
+                                    </li>
+                                {% else %}
+                                    <li>{{ time_slot.start_time }} - {{ time_slot.end_time }} ({{ time_slot.status }})</li>
+                                {% endif %}
                             {% endfor %}
                         </ul>
                         <button class="btn btn-success w-100" onclick="bookAppointment('{{ doctor.id }}')">Take Appointment</button>

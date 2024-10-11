@@ -20,8 +20,8 @@ class CustomLoginView(View):
                 return redirect('patient_home')
             elif user.role == 'doctor':
                 return redirect('doctor_home')
-            elif user.role == 'patient':
-                return redirect('patient_home')
+            elif user.role == 'admin':
+                return redirect('admin_home')
             else:
                 return redirect('patient_home')
         else:

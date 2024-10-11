@@ -45,14 +45,26 @@ class DoctorsListView(LoginRequiredMixin, View):
         print(f"Department: {dept}")
         if dept:
             doctors = CustomUser.objects.filter(role='doctor', specialization__specialization=dept)
-            print(f"Doctor: {doctors}")
+            india = timezone('Asia/Kolkata')
+            today = datetime.now(india).strftime('%Y-%m-%d')
+            doctors_with_slots = []
+            for doctor in doctors:
+                slots = DoctorAvailability.objects.filter(doctor=doctor, day=today).first()
+                if slots:
+                    doctors_with_slots.append({
+                        'doctor': doctor,
+                        'time_slots': slots.time_slots
+                    })
+            print(f"Doctors with slots: {doctors_with_slots}")
+
         else:
             doctors = CustomUser.objects.filter(role='doctor')
 
         context = {
-            'doctors': doctors
+            'doctors': doctors_with_slots,
         }
-        print(f"availability: {doctors.first().doctoravailability_set.all()}")
+        # availability = doctors.first().doctoravailability_set.all()
+        # print(f"availability: {availability}")
         return render(request, self.template_name, context)
 
 
@@ -392,3 +404,124 @@ def save_prescription(request):
         }
     )    
     return JsonResponse({'status': 'success'})
+
+
+class ViewPrescriptionView(LoginRequiredMixin, View):
+    template_name = 'view_prescription.html'
+
+    def get(self, request, id):
+        appointment_id = id
+        if not appointment_id:
+            return JsonResponse({'error': 'Missing appointment ID'}, status=400)
+        
+        appointment = get_object_or_404(Appointment, id=appointment_id)
+        medications = Medication.objects.filter(appointment=appointment)
+        medications_list = medications.values()
+        prescription = Prescription.objects.filter(appointment=appointment).first()
+
+        context = {
+            'appointment': appointment,
+            'patient': appointment.patient,
+            'doctor': appointment.doctor,
+            'medications': medications_list,
+            'diagnosis': prescription.diagnosis if prescription else None,
+        }
+        return render(request, self.template_name, context)
+    
+
+#Admin views
+
+class AdminHomeView(LoginRequiredMixin, View):
+    template_name = 'admin/admin_dashboard.html'
+
+    def get(self, request):
+        user_id = request.user.id
+        profile = CustomUser.objects.get(id = user_id)
+        context = {
+            'first_name': profile.first_name,
+            'last_name': profile.last_name,
+            'email': profile.email,
+            'phone_number': profile.phone_number,
+        }
+        return render(request, self.template_name, context)
+    
+
+class AdminProfileView(LoginRequiredMixin, View):
+    template_name = 'admin/admin_profile.html'
+
+    def get(self, request):
+        admin_id = request.user.id
+        profile = CustomUser.objects.get(id = admin_id)
+        context = {
+            'first_name': profile.first_name,
+            'last_name': profile.last_name,
+            'email': profile.email,
+            'phone_number': profile.phone_number,
+        }
+        return render(request, self.template_name, context)
+    
+
+class AdminDoctorsListView(LoginRequiredMixin, View):
+    template_name = 'admin/admin_doctors_list.html'
+
+    def get(self, request):
+        doctors = CustomUser.objects.filter(role='doctor')
+        doctors_with_specializations = []
+
+        for doctor in doctors:
+            specialization = Specialization.objects.filter(user=doctor).first()
+            doctor_info = {
+                'id': doctor.id,
+                'first_name': doctor.first_name,
+                'last_name': doctor.last_name,
+                'email': doctor.email,
+                'phone_number': doctor.phone_number,
+                'specialization': specialization if specialization else None
+            }
+            doctors_with_specializations.append(doctor_info)
+
+        context = {
+            'doctors': doctors_with_specializations,
+        }
+        print(f"Context: {context}")
+        return render(request, self.template_name, context)
+    
+
+class AdminPatientsListView(LoginRequiredMixin, View):
+    template_name = 'admin/admin_patients_list.html'
+
+    def get(self, request):
+        patients = CustomUser.objects.filter(role='patient')
+        context = {
+            'patients': patients,
+        }
+        return render(request, self.template_name, context)
+    
+
+class AdminAppointmentsListView(LoginRequiredMixin, View):
+    template_name = 'admin/admin_appointments_list.html'
+
+    def get(self, request):
+        appointments = Appointment.objects.all()
+        context = {
+            'appointments': appointments,
+        }
+        return render(request, self.template_name, context)
+    
+
+@require_POST
+@login_required
+def admin_update_profile(request):
+    profile = CustomUser.objects.get(id = request.user.id)
+    profile.first_name = request.POST.get('first_name', profile.first_name)
+    profile.last_name = request.POST.get('last_name', profile.last_name)
+    profile.phone_number = request.POST.get('phone_number', profile.phone_number)
+    profile.save()
+
+    response_data = {
+        'first_name': profile.first_name,
+        'last_name': profile.last_name,
+        'phone_number': profile.phone_number
+    }
+    
+    return JsonResponse(response_data)

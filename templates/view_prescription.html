@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Prescription</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="my-4">
+            <h1 class="text-center">Prescription Details</h1>
+        </header>
+        <main>
+            <section class="appointment-details mb-4"></section>
+                <h2>Appointment Details</h2>
+                <p><strong>Appointment ID:</strong> {{ appointment.id }}</p>
+                <p><strong>Patient Name:</strong> {{ patient.name }}</p>
+                <p><strong>Doctor Name:</strong> {{ doctor.name }}</p>
+            </section>
+            <section class="prescription-details">
+                <h2>Prescription</h2>
+                <p><strong>Diagnosis:</strong> {{ diagnosis }}</p>
+                <h3>Medications</h3>
+                <ul class="list-group"></ul>
+                    {% for medication in medications %}
+                        <li class="list-group-item">{{ medication.medication }} - {{ medication.dosage }} - {{ medication.frequency }}</li>
+                    {% endfor %}
+                </ul>
+            </section>
+        </main>
+        <footer class="text-center mt-4"></footer>
+            <p>&copy; 2023 E-HOSPITAL. All rights reserved.</p>
+        </footer>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -115,8 +115,11 @@
                                 {% if appointment.status != 'cancelled' %}
                                 <button class="btn btn-danger btn-sm">
                                     Cancel
-                                </button>                                
+                                </button>
                                 {% endif %}
+                                <a href="{% url 'view_prescription' appointment.id %}" class="btn btn-primary btn-sm">
+                                    View Prescription
+                                </a>
                             </td>
                         </tr>
                         {% endfor %}

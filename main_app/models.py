@@ -1,10 +1,10 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from auth_app.models import CustomUser  # Adjust the import based on your project structure
+from auth_app.models import CustomUser
 
 class Specialization(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)  # Use the imported CustomUser directly
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     specialization = models.CharField(max_length=50)
     qualification = models.CharField(max_length=50, null=True, blank=True)
     fee = models.PositiveIntegerField(null=True, blank=True, default=None)
