@@ -12,6 +12,7 @@ from main_app.models import Appointment
 
 class CashPaymentView(LoginRequiredMixin, View):
     template_name = 'appointment_booked.html'
+    
     def get(self, request, appointment_id):
         appointment = Appointment.objects.get(id=appointment_id)
         appointment.status = 'scheduled'

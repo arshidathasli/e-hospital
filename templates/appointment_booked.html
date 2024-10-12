@@ -1,22 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Appointment Booked</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="d-flex justify-content-center align-items-center vh-100 bg-light">
+{% extends 'patient/patient_dashboard_base.html' %}
+
+{% block content %}
     <div class="card text-center shadow-sm">
         <div class="card-body">
             <h1 class="card-title text-success">Appointment Booked Successfully!</h1>
             <p class="card-text text-muted">Thank you for booking your appointment with us. We look forward to seeing you.</p>
             <p class="card-text text-muted">Your Appointment ID: <strong>{{ appointment_id }}</strong></p>
-            <a href="/" class="btn btn-success">Go to Homepage</a>
+            <a href="/patient_home/" class="btn btn-success">Go to Homepage</a>
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+    {% endblock %}

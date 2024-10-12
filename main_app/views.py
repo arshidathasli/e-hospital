@@ -20,21 +20,69 @@ from auth_app.models import CustomUser
 
 
 class PatientHomeView(LoginRequiredMixin, View):
+    template_name = 'patient/patient_home.html'
+
     def get(self, request, *args, **kwargs):
+        profile = CustomUser.objects.get(id = request.user.id)
         context = {
-            'patient_id': request.user.id
+            'patient': profile,
+            'first_name': profile.first_name,
+            'last_name': profile.last_name,
+            'email': profile.email,
         }
-        return render(request, 'patient_home.html', context)
+        return render(request,self.template_name, context)
+    
+
+class PatientProfileView(LoginRequiredMixin, View):
+    template_name = 'patient/patient_profile.html'
+
+    def get(self, request):
+        profile = CustomUser.objects.get(id = request.user.id)
+        context = {
+            'first_name': profile.first_name,
+            'last_name': profile.last_name,
+            'email': profile.email,
+            'phone_number': profile.phone_number,
+        }
+        return render(request, self.template_name, context)
+
+
+class ViewResourcesView(LoginRequiredMixin, View):
+    template_name = 'patient/patient_resources.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
 
 
 class PatientMedicalHistoryView(LoginRequiredMixin, View):
+    template_name = 'patient/patient_medical_history.html'
+
     def get(self, request, *args, **kwargs):
+        profile = CustomUser.objects.get(id = request.user.id)
         appointments = Appointment.objects.filter(patient=request.user).order_by('-id')
         context = {
             'patient_id': request.user.id,
             'appointments': appointments,
+            'first_name': profile.first_name,
+            'last_name': profile.last_name,
+            'email': profile.email,
         }
-        return render(request, 'patient_medical_history.html', context)
+        return render(request, self.template_name, context)
+    
+class PatientAppointmentHistoryView(LoginRequiredMixin, View):
+    template_name = 'patient/patient_appointment_history.html'
+
+    def get(self, request, *args, **kwargs):
+        profile = CustomUser.objects.get(id = request.user.id)
+        appointments = Appointment.objects.filter(patient=request.user).order_by('-id')
+        context = {
+            'patient_id': request.user.id,
+            'appointments': appointments,
+            'first_name': profile.first_name,
+            'last_name': profile.last_name,
+            'email': profile.email,
+        }
+        return render(request, self.template_name, context)
 
 
 class DoctorsListView(LoginRequiredMixin, View):

@@ -17,10 +17,13 @@ from payment_app.views import (
 from main_app.views import (
     # Patient related
     PatientHomeView,
+    PatientProfileView,
     PatientMedicalHistoryView,
+    PatientAppointmentHistoryView,
     DoctorsListView,
     AppointmentTimeView,
     ViewPrescriptionView,
+    ViewResourcesView,
 
     # Doctor related
     DoctorHomeView,
@@ -58,7 +61,6 @@ urlpatterns = [
     path('admin_doctors_list/', AdminDoctorsListView.as_view(), name='admin_doctors_list'),
     path('admin_patients_list/', AdminPatientsListView.as_view(), name='admin_patients_list'),
     path('admin_appointments_list/', AdminAppointmentsListView.as_view(), name='admin_appointments_list'),
-
     path('admin_update_profile/', admin_update_profile, name='admin_update_profile'),
     path('cancel_appointment/', cancel_appointment, name='cancel_appointment_by_admin'),
 
@@ -72,7 +74,10 @@ urlpatterns = [
 
     # Patient paths
     path('patient_home/', PatientHomeView.as_view(), name='patient_home'),
+    path('patient_profile/', PatientProfileView.as_view(), name='patient_profile'),
+    path('view_resources/', ViewResourcesView.as_view(), name='view_resources'),
     path('patient_medical_history/', PatientMedicalHistoryView.as_view(), name='patient_medical_history'),
+    path('patient_appointment_history/', PatientAppointmentHistoryView.as_view(), name='patient_appointment_history'),
     path('patient_medical_history/cancel_appointment/', cancel_appointment, name='cancel_appointment_by_patient'),
     path('doctors_list/', DoctorsListView.as_view(), name='doctors_list'),
     path('appointment_time/', AppointmentTimeView.as_view(), name='appointment_time'),

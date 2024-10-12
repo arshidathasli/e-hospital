@@ -1,0 +1,89 @@
+{% extends 'patient/patient_dashboard_base.html' %}
+
+{% block content %}
+<div class="container mt-5"></div>
+    <!-- Doctor Profile Section -->
+    <div class="card p-4 shadow-sm">
+        <div class="row">
+
+            <!-- Doctor Profile Information -->
+            <div class="col-md-9">
+                <h2 class="text-success" id="profileFirstName">{{ first_name }} {{ last_name }}</h2>
+                <p><strong>Email:</strong> <span id="profileEmail">{{ email }}</span></p>
+                <p><strong>Phone:</strong> <span id="profilePhoneNumber">{{ phone_number }}</span></p>
+            </div>            
+            <!-- Button to trigger modal -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editProfileModal">
+                Edit Profile
+            </button>
+            
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+            <div class="modal-body">
+            <form id="editProfileForm" method="POST" action="{% url 'admin_update_profile' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" value="{{ first_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="last_name">Last Name</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" value="{{ last_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone_number">Phone Number</label>
+                    <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ phone_number }}" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#editProfileForm').on('submit', function(e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+            
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: formData,
+                success: function(response) {
+                    console.log("AJAX request successful!");
+                    $('#profileFirstName').text(response.first_name);
+                    $('#profileLastName').text(response.last_name);
+                    $('#profilePhoneNumber').text(response.phone_number);
+    
+                    $('#editProfileModal').modal('hide');
+                    document.getElementById('editProfileModal').classList.remove('show');
+                    document.querySelector('.modal-backdrop').remove();
+                    document.body.classList.remove('modal-open');
+                    document.body.style.removeProperty('padding-right');
+                    console.log("Profile updated successfully!");
+                },
+                error: function(xhr, status, error) {
+                    console.log('An error occurred: ' + error);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
