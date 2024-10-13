@@ -109,4 +109,4 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-WSGI_APPLICATION = 'portfolio.wsgi.application'
+WSGI_APPLICATION = 'e_hospital.wsgi.application'
