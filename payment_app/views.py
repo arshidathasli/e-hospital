@@ -5,16 +5,15 @@ from django.views.generic import TemplateView, FormView
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from main_app.models import Appointment
-from dotenv import load_dotenv
 import razorpay
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from decouple import config
 
-load_dotenv()
 
-KEY_ID = os.getenv('KEY_ID')
-KEY_SECRET = os.getenv('KEY_SECRET')
+KEY_ID = config('KEY_ID')
+KEY_SECRET = config('KEY_SECRET')
 
 
 class CashPaymentView(LoginRequiredMixin, View):
