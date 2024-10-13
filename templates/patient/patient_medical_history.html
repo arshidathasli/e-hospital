@@ -8,7 +8,8 @@
         <p class="text-muted">A comprehensive record of the patient's medical history, diagnosis, medications, allergies, and treatments.</p>
     </div>
 
-    <!-- Diagnosis Section -->
+    
+    <!-- Prescription Section -->
     <div class="card mb-4 shadow-sm">
         <div class="card-body">
             <h2 class="card-title text-success">Diagnosis</h2>
@@ -16,21 +17,18 @@
                 <thead>
                     <tr>
                         <th scope="col">Date</th>
-                        <th scope="col">Condition</th>
+                        <th scope="col">Diagnosis</th>
                         <th scope="col">Doctor</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% for prescription in prescriptions %}
                     <tr>
-                        <td>2023-01-10</td>
-                        <td>Diabetes</td>
-                        <td>Dr. Sarah Johnson</td>
+                        <td>{{ prescription.appointment_date }}</td>
+                        <td>{{ prescription.diagnosis }}</td>
+                        <td>{{ prescription.doctor_name }}</td>
                     </tr>
-                    <tr>
-                        <td>2023-06-15</td>
-                        <td>Hypertension</td>
-                        <td>Dr. Michael Brown</td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -46,35 +44,20 @@
                         <th scope="col">Medication Name</th>
                         <th scope="col">Dosage</th>
                         <th scope="col">Start Date</th>
-                        <th scope="col">End Date</th>
+                        <th scope="col">Duration(days)</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% for medication in medications %}
                     <tr>
-                        <td>Metformin</td>
-                        <td>500mg</td>
-                        <td>2023-01-11</td>
-                        <td>Ongoing</td>
+                        <td>{{ medication.medication }}</td>
+                        <td>{{ medication.dosage }}</td>
+                        <td>{{ medication.start_date }}</td>
+                        <td>{{ medication.duration }}</td>
                     </tr>
-                    <tr>
-                        <td>Amlodipine</td>
-                        <td>5mg</td>
-                        <td>2023-06-16</td>
-                        <td>2023-09-16</td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
-        </div>
-    </div>
-
-    <!-- Allergies Section -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-body">
-            <h2 class="card-title text-success">Allergies</h2>
-            <ul class="list-group">
-                <li class="list-group-item">Penicillin</li>
-                <li class="list-group-item">Peanuts</li>
-            </ul>
         </div>
     </div>
 

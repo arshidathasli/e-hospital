@@ -1,13 +1,20 @@
+import os
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.urls import reverse
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, FormView
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-
 from main_app.models import Appointment
+from dotenv import load_dotenv
+import razorpay
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 
+load_dotenv()
+
+KEY_ID = os.getenv('KEY_ID')
+KEY_SECRET = os.getenv('KEY_SECRET')
 
 
 class CashPaymentView(LoginRequiredMixin, View):
@@ -16,6 +23,21 @@ class CashPaymentView(LoginRequiredMixin, View):
     def get(self, request, appointment_id):
         appointment = Appointment.objects.get(id=appointment_id)
         appointment.status = 'scheduled'
+        appointment.save()
+        context = {
+            'appointment_id': appointment_id,
+        }
+        return render(request, self.template_name, context)
+    
+
+class PaymentGatewaySuccessfulView(LoginRequiredMixin, View):
+    template_name = 'appointment_booked.html'
+    
+    def get(self, request, appointment_id):
+        appointment = Appointment.objects.get(id=appointment_id)
+        appointment.status = 'scheduled'
+        appointment.payment_status = 'paid'
+        appointment.mode_of_payment = 'online'
         appointment.save()
         context = {
             'appointment_id': appointment_id,
@@ -56,4 +78,21 @@ class ProcessPaymentView(View):
 # Success view
 class PaymentSuccessView(TemplateView):
     template_name = 'payment_success.html'
+
+
+@csrf_exempt
+def create_razorpay_order(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        amount = int(data.get('amount')) * 100  # Convert to paise
+        client = razorpay.Client(auth=(KEY_ID, KEY_SECRET))
+        payment = client.order.create({'amount': amount, 'currency': 'INR', 'payment_capture': '1'})
+        print(f"Payment: {payment}")
+        return JsonResponse({
+            'id': payment['id'],  # Order ID created by Razorpay
+            'amount': payment['amount'],  # Amount in paise
+            'currency': payment['currency']
+        })
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
 

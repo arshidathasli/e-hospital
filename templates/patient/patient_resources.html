@@ -1,5 +1,88 @@
 {% extends 'patient/patient_dashboard_base.html' %}
 
 {% block content %}
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
+<!-- Page Title -->
+<title>Health Tips for General Health and Wellness</title>
+<h1 class="mt-4">Health Tips for General Health and Wellness</h1>
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title border-bottom pb-2 mb-4">Stay Physically Active</h5>
+            <p class="card-text">Exercise regularly: Aim for at least 150 minutes of moderate aerobic activity or 75 minutes of vigorous activity per week. This can include walking, jogging, cycling, or swimming.</p>
+            <p class="card-text">Strength training: Incorporate strength training exercises at least twice a week to build muscle, improve bone density, and support overall mobility.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Eat a Balanced Diet</h5>
+            <p class="card-text">Consume whole foods: Focus on whole grains, fruits, vegetables, lean proteins, and healthy fats like nuts, seeds, and olive oil.</p>
+            <p class="card-text">Portion control: Avoid overeating by paying attention to portion sizes and eating mindfully. Stop eating when you're comfortably full, not stuffed.</p>
+            <p class="card-text">Limit processed foods: Cut back on high-sugar, high-sodium, and heavily processed foods that can lead to chronic health issues.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Stay Hydrated</h5>
+            <p class="card-text">Drink plenty of water throughout the day. A general guideline is 8 glasses of water daily, though your needs may vary based on activity level, climate, and health conditions.</p>
+            <p class="card-text">Limit sugary drinks: Avoid sodas and drinks high in sugar, as they add unnecessary calories and can lead to weight gain and increased risk of conditions like diabetes.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Get Enough Sleep</h5>
+            <p class="card-text">Prioritize sleep: Aim for 7-9 hours of quality sleep each night. Good sleep helps with mental clarity, physical recovery, and overall mood.</p>
+            <p class="card-text">Create a bedtime routine: Establish a calming pre-sleep routine by avoiding screens, caffeine, and large meals before bedtime.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Manage Stress</h5>
+            <p class="card-text">Practice relaxation techniques: Try mindfulness, meditation, deep breathing exercises, or yoga to manage stress effectively.</p>
+            <p class="card-text">Stay connected: Maintain healthy relationships and social connections to combat feelings of isolation and stress.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Regular Health Checkups</h5>
+            <p class="card-text">Visit your doctor: Schedule regular health checkups and screenings based on your age, gender, and health history. Early detection of conditions can improve outcomes.</p>
+            <p class="card-text">Monitor your body: Pay attention to any changes in your health—such as persistent fatigue, unusual weight changes, or unexplained symptoms—and seek medical advice if needed.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Practice Good Hygiene</h5>
+            <p class="card-text">Wash your hands: Regularly wash your hands with soap and water, especially before eating, after using the restroom, or after being in public places.</p>
+            <p class="card-text">Oral hygiene: Brush your teeth twice a day, floss daily, and visit the dentist regularly to maintain good oral health.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Maintain a Healthy Weight</h5>
+            <p class="card-text">Healthy weight management: Achieving and maintaining a healthy weight reduces the risk of chronic conditions such as heart disease, diabetes, and certain cancers.</p>
+            <p class="card-text">Balance calorie intake: Eat a diet that provides the right amount of energy to support your activity level, and avoid overeating or undereating.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Limit Alcohol and Avoid Smoking</h5>
+            <p class="card-text">Limit alcohol: If you drink alcohol, do so in moderation. For women, that's one drink a day, and for men, it's two drinks per day.</p>
+            <p class="card-text">Avoid smoking: Smoking increases the risk of numerous health issues, including lung cancer, heart disease, and respiratory problems. If you smoke, seek help to quit.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Mental Health Care</h5>
+            <p class="card-text">Self-care: Take time for hobbies, relaxation, and activities that bring you joy. Don't hesitate to ask for help if you're feeling mentally or emotionally overwhelmed.</p>
+            <p class="card-text">Seek support: Speak to a mental health professional if you're dealing with persistent anxiety, depression, or stress. Mental health is as important as physical health.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Sun Protection</h5>
+            <p class="card-text">Protect your skin: Apply sunscreen with at least SPF 30 when you're outdoors, wear protective clothing, and avoid direct sun exposure during peak hours (10 a.m. to 4 p.m.).</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Stay Educated</h5>
+            <p class="card-text">Learn about health: Stay informed on the latest health guidelines and recommendations. Keep up with vaccinations, and ask your doctor about any health concerns.</p>
+            
+            <h2 class="card-title border-bottom pb-2 mb-4">After Your Clinic Visit</h2>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Follow Medication Instructions</h5>
+            <p class="card-text">If prescribed any medications, take them as directed by your doctor. Don't skip doses and complete the full course of antibiotics if prescribed.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Attend Follow-Up Appointments</h5>
+            <p class="card-text">If your doctor has requested follow-ups or additional tests, make sure to schedule and attend them. It’s important for ongoing care.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Monitor Symptoms</h5>
+            <p class="card-text">Track any changes in your symptoms. If they worsen or if you experience side effects from medication, contact your clinic immediately.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Stay Active and Eat Well</h5>
+            <p class="card-text">Continue focusing on a healthy lifestyle. Regular exercise, a balanced diet, and good sleep are key to recovery and overall well-being.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Hygiene and Infection Prevention</h5>
+            <p class="card-text">Wash your hands regularly, especially after visiting public spaces or clinics. If you have an infection, take precautions to avoid spreading it to others.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Hydration and Rest</h5>
+            <p class="card-text">Ensure you’re drinking enough water and getting adequate rest, especially if you're recovering from an illness or injury.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Ask About Vaccinations</h5>
+            <p class="card-text">After the visit, check if you're up to date with vaccinations. Clinics can provide you with necessary information on seasonal vaccines (like flu shots) or travel vaccines if needed.</p>
+
+            <h5 class="card-title border-bottom pb-2 mb-4">Mental Health Check-In</h5>
+            <p class="card-text">If your clinic visit was stressful, take time to unwind. Stress and anxiety can affect health, so practice relaxation techniques like deep breathing or meditation.</p>
+        </div>
+    </div>
+</div>
 {% endblock %}

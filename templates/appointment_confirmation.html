@@ -17,7 +17,74 @@
             <div class="card-footer text-center">
                 <div class="btn-group" role="group">
                     <a href="{% url 'cash_payment_url' appointment_id=appointment_id %}" class="btn btn-success">Proceed with Cash Payment</a>
-                    <a href="{{ payment_gateway_url }}" class="btn btn-primary">Proceed to Payment Gateway</a>
+                    <button id="razorpay-button" class="btn btn-primary">Proceed to Payment Gateway</button>
+                    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+                    <script>
+                        document.getElementById('razorpay-button').onclick = function(e) {
+                        e.preventDefault();
+
+                        fetch('create-razorpay-order/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            body: JSON.stringify({
+                                amount: {{ fee }}  // Ensure you're passing the correct fee
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                console.error('Error:', data.error);
+                                return;
+                            }
+
+                            // Ensure Razorpay modal options are correctly set
+                            var options = {
+                                "key": "rzp_test_TGuLe9GnHOje1I",  // Replace with your actual key
+                                "amount": data.amount,  // Amount in paise
+                                "currency": "INR",
+                                "name": "E-hospital",
+                                "description": "Test Transaction",
+                                "image": "https://example.com/your_logo",  // Optional logo
+                                "order_id": data.id,  // Pass the order ID returned by Razorpay
+                                "handler": function (response) {
+                                    // alert('Payment successful. Payment ID: ' + response.razorpay_payment_id);
+                                    // alert('Order ID: ' + response.razorpay_order_id);
+                                    // alert('Signature: ' + response.razorpay_signature);
+                                    // Redirect to a success page
+                                    window.location.href = "{% url 'payment_success_url' appointment_id=appointment_id %}";
+                                },
+                                "prefill": {
+                                    "name": "{{ patient_name }}",  // Pre-fill customer name
+                                    "email": "{{ patient_email }}",  // Pre-fill customer email
+                                    "contact": "{{ patient_contact }}"  // Pre-fill customer contact
+                                },
+                                "notes": {
+                                    "address": "Razorpay Corporate Office"
+                                },
+                                "theme": {
+                                    "color": "#3399cc"  // Customize theme color
+                                }
+                            };
+
+                            // Initialize Razorpay instance and open the modal
+                            var rzp1 = new Razorpay(options);
+
+                            // Razorpay will show its modal popup
+                            rzp1.on('payment.failed', function (response) {
+                                console.error('Payment failed:', response.error);
+                            });
+
+                            // Trigger Razorpay modal
+                            rzp1.open();
+
+                        })
+                        .catch(error => console.error('Error:', error));
+                    };
+
+                    </script>
                 </div>
             </div>
         </div>

@@ -38,9 +38,7 @@ class Appointment(models.Model):
     ]
     MODE_CHOICES = [
         ('cash', 'Cash'),
-        ('card', 'Card'),
-        ('netbanking', 'Net Banking'),
-        ('upi', 'UPI'),
+        ('online', 'Online'),
     ]
 
     patient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='patient_appointments')
@@ -53,7 +51,7 @@ class Appointment(models.Model):
     mode_of_payment = models.CharField(max_length=50, choices=MODE_CHOICES, default='cash')
 
     def __str__(self):
-        return f"{self.patient.first_name} with {self.doctor.first_name} on {self.appointment_date_time.strftime('%Y-%m-%d %H:%M')}"
+        return f"{self.patient.first_name} with {self.doctor.first_name} on {self.appointment_date.strftime('%Y-%m-%d %H:%M')}"
 
     def clean(self):
         # Ensure the patient has the 'patient' role

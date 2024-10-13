@@ -51,7 +51,13 @@ class ViewResourcesView(LoginRequiredMixin, View):
     template_name = 'patient/patient_resources.html'
 
     def get(self, request):
-        return render(request, self.template_name)
+        profile = CustomUser.objects.get(id = request.user.id)
+        context = {
+            'first_name': profile.first_name,
+            'last_name': profile.last_name,
+            'email': profile.email,
+        }
+        return render(request, self.template_name, context)
 
 
 class PatientMedicalHistoryView(LoginRequiredMixin, View):
@@ -60,15 +66,37 @@ class PatientMedicalHistoryView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         profile = CustomUser.objects.get(id = request.user.id)
         appointments = Appointment.objects.filter(patient=request.user).order_by('-id')
+        medications = Medication.objects.filter(appointment__patient=request.user)
+        prescriptions = Prescription.objects.filter(appointment__in=appointments)
+        prescriptions_list = []
+        for prescription in prescriptions:
+            appointment = prescription.appointment
+            patient = appointment.patient
+            prescription_data = {
+            'id': prescription.id,
+            'diagnosis': prescription.diagnosis,
+            'appointment_id': appointment.id,
+            'appointment_date': appointment.appointment_date,
+            'doctor_id': appointment.doctor.id,
+            'doctor_name': f"Dr. {appointment.doctor.first_name} {appointment.doctor.last_name}",
+            'patient_id': patient.id,
+            'patient_name': f"{patient.first_name} {patient.last_name}",
+            }
+            prescriptions_list.append(prescription_data)
+        
+        print(f"Prescriptions: {prescriptions_list}")
         context = {
             'patient_id': request.user.id,
             'appointments': appointments,
+            'medications': medications,
+            'prescriptions': prescriptions_list,
             'first_name': profile.first_name,
             'last_name': profile.last_name,
             'email': profile.email,
         }
         return render(request, self.template_name, context)
     
+
 class PatientAppointmentHistoryView(LoginRequiredMixin, View):
     template_name = 'patient/patient_appointment_history.html'
 

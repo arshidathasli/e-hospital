@@ -7,6 +7,7 @@ from auth_app.views import (
 )
 from payment_app.views import (
     CashPaymentView,
+    PaymentGatewaySuccessfulView,
 
     # ProceedPaymentView,
     # PaymentView,
@@ -52,6 +53,7 @@ from main_app.views import (
     # Admin functions
     admin_update_profile,
 )
+from payment_app.views import create_razorpay_order
 
 
 urlpatterns = [
@@ -83,7 +85,11 @@ urlpatterns = [
     path('appointment_time/', AppointmentTimeView.as_view(), name='appointment_time'),
     path('confirm-appointment/', ConfirmAppointmentView.as_view(), name='confirm_appointment'),
     path('confirm-appointment/cash-payment/<int:appointment_id>/', CashPaymentView.as_view(), name='cash_payment_url'),
+    path('confirm-appointment/payment-gateway/<int:appointment_id>/', PaymentGatewaySuccessfulView.as_view(), name='payment_success_url'),
     path('view_prescription/<int:id>/', ViewPrescriptionView.as_view(), name='view_prescription'),
+
+    # Payment paths
+    path('confirm-appointment/create-razorpay-order/', create_razorpay_order, name='create_razorpay_order'),
 
     # Doctor paths
     path('doctor_home/', DoctorHomeView.as_view(), name='doctor_home'),
